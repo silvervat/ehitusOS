@@ -182,3 +182,9 @@ export interface TableState {
   filters: FilterState[]
   globalFilter: string
 }
+
+// =============================================
+// CMS Types (re-export)
+// =============================================
+
+export * from './cms.types'

@@ -21,6 +21,12 @@ export default function DashboardLayout({
             <NavItem href="/invoices" label="Arved" />
             <NavItem href="/employees" label="Töötajad" />
             <NavItem href="/documents" label="Dokumendid" />
+            <li className="pt-4 mt-4 border-t border-slate-700">
+              <span className="px-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                Admin
+              </span>
+            </li>
+            <NavItem href="/admin/cms" label="CMS Haldus" />
             <NavItem href="/settings" label="Seaded" />
           </ul>
         </nav>
