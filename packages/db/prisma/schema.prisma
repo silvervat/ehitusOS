@@ -1,0 +1,225 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// =============================================
+// MULTI-TENANT CORE
+// =============================================
+
+model Tenant {
+  id                    String    @id @default(uuid()) @db.Uuid
+  name                  String
+  slug                  String    @unique
+  domain                String?   @unique
+  logoUrl               String?   @map("logo_url")
+  primaryColor          String    @default("#279989") @map("primary_color")
+  secondaryColor        String    @default("#333F48") @map("secondary_color")
+  settings              Json      @default("{}")
+  features              Json      @default("{}")
+  maxUsers              Int       @default(50) @map("max_users")
+  maxProjects           Int       @default(100) @map("max_projects")
+  maxStorageGb          Int       @default(10) @map("max_storage_gb")
+  status                String    @default("active")
+  subscriptionTier      String    @default("basic") @map("subscription_tier")
+  trialEndsAt           DateTime? @map("trial_ends_at")
+  subscriptionStartsAt  DateTime? @map("subscription_starts_at")
+  subscriptionEndsAt    DateTime? @map("subscription_ends_at")
+  billingEmail          String?   @map("billing_email")
+  createdAt             DateTime  @default(now()) @map("created_at")
+  updatedAt             DateTime  @updatedAt @map("updated_at")
+  deletedAt             DateTime? @map("deleted_at")
+
+  // Relations
+  users    UserProfile[]
+  projects Project[]
+  companies Company[]
+  invoices Invoice[]
+  employees Employee[]
+
+  @@map("tenants")
+}
+
+model UserProfile {
+  id              String    @id @default(uuid()) @db.Uuid
+  tenantId        String    @map("tenant_id") @db.Uuid
+  authUserId      String    @unique @map("auth_user_id") @db.Uuid
+  email           String
+  fullName        String?   @map("full_name")
+  avatarUrl       String?   @map("avatar_url")
+  role            String    @default("user")
+  permissions     Json      @default("[]")
+  settings        Json      @default("{}")
+  lastLoginAt     DateTime? @map("last_login_at")
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
+  deletedAt       DateTime? @map("deleted_at")
+
+  // Relations
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@index([authUserId])
+  @@map("user_profiles")
+}
+
+// =============================================
+// BUSINESS ENTITIES
+// =============================================
+
+model Project {
+  id              String    @id @default(uuid()) @db.Uuid
+  tenantId        String    @map("tenant_id") @db.Uuid
+  code            String
+  name            String
+  description     String?
+  clientId        String?   @map("client_id") @db.Uuid
+  status          String    @default("draft")
+  budget          Decimal?  @db.Decimal(15, 2)
+  currency        String    @default("EUR")
+  startDate       DateTime? @map("start_date")
+  endDate         DateTime? @map("end_date")
+  address         String?
+  city            String?
+  country         String    @default("Estonia")
+  managerId       String?   @map("manager_id") @db.Uuid
+  metadata        Json      @default("{}")
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
+  deletedAt       DateTime? @map("deleted_at")
+
+  // Relations
+  tenant   Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  client   Company?  @relation(fields: [clientId], references: [id])
+  invoices Invoice[]
+
+  @@unique([tenantId, code])
+  @@index([tenantId])
+  @@index([status])
+  @@map("projects")
+}
+
+model Company {
+  id              String    @id @default(uuid()) @db.Uuid
+  tenantId        String    @map("tenant_id") @db.Uuid
+  registryCode    String?   @map("registry_code")
+  vatNumber       String?   @map("vat_number")
+  name            String
+  type            String    @default("client") // client, supplier, subcontractor
+  email           String?
+  phone           String?
+  address         String?
+  city            String?
+  country         String    @default("Estonia")
+  bankAccount     String?   @map("bank_account")
+  paymentTermDays Int       @default(14) @map("payment_term_days")
+  creditLimit     Decimal?  @db.Decimal(15, 2) @map("credit_limit")
+  notes           String?
+  metadata        Json      @default("{}")
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
+  deletedAt       DateTime? @map("deleted_at")
+
+  // Relations
+  tenant   Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  projects Project[]
+  invoices Invoice[]
+
+  @@unique([tenantId, registryCode])
+  @@index([tenantId])
+  @@index([type])
+  @@map("companies")
+}
+
+model Invoice {
+  id              String    @id @default(uuid()) @db.Uuid
+  tenantId        String    @map("tenant_id") @db.Uuid
+  invoiceNumber   String    @map("invoice_number")
+  type            String    @default("sales") // sales, purchase
+  status          String    @default("draft") // draft, sent, paid, overdue, cancelled
+  projectId       String?   @map("project_id") @db.Uuid
+  companyId       String?   @map("company_id") @db.Uuid
+  issueDate       DateTime  @map("issue_date")
+  dueDate         DateTime  @map("due_date")
+  subtotal        Decimal   @db.Decimal(15, 2)
+  vatAmount       Decimal   @db.Decimal(15, 2) @map("vat_amount")
+  total           Decimal   @db.Decimal(15, 2)
+  currency        String    @default("EUR")
+  paidAmount      Decimal   @default(0) @db.Decimal(15, 2) @map("paid_amount")
+  paidAt          DateTime? @map("paid_at")
+  notes           String?
+  lineItems       Json      @default("[]") @map("line_items")
+  metadata        Json      @default("{}")
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
+  deletedAt       DateTime? @map("deleted_at")
+
+  // Relations
+  tenant  Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  project Project? @relation(fields: [projectId], references: [id])
+  company Company? @relation(fields: [companyId], references: [id])
+
+  @@unique([tenantId, invoiceNumber])
+  @@index([tenantId])
+  @@index([status])
+  @@index([dueDate])
+  @@map("invoices")
+}
+
+model Employee {
+  id              String    @id @default(uuid()) @db.Uuid
+  tenantId        String    @map("tenant_id") @db.Uuid
+  employeeCode    String    @map("employee_code")
+  firstName       String    @map("first_name")
+  lastName        String    @map("last_name")
+  email           String?
+  phone           String?
+  personalCode    String?   @map("personal_code")
+  position        String?
+  department      String?
+  employmentType  String    @default("full_time") @map("employment_type")
+  startDate       DateTime? @map("start_date")
+  endDate         DateTime? @map("end_date")
+  hourlyRate      Decimal?  @db.Decimal(10, 2) @map("hourly_rate")
+  monthlyRate     Decimal?  @db.Decimal(10, 2) @map("monthly_rate")
+  status          String    @default("active")
+  metadata        Json      @default("{}")
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
+  deletedAt       DateTime? @map("deleted_at")
+
+  // Relations
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, employeeCode])
+  @@index([tenantId])
+  @@index([status])
+  @@map("employees")
+}
+
+// =============================================
+// AUDIT LOG
+// =============================================
+
+model AuditLog {
+  id          String   @id @default(uuid()) @db.Uuid
+  tenantId    String   @map("tenant_id") @db.Uuid
+  userId      String?  @map("user_id") @db.Uuid
+  action      String   // create, update, delete, view
+  entityType  String   @map("entity_type")
+  entityId    String   @map("entity_id") @db.Uuid
+  oldValues   Json?    @map("old_values")
+  newValues   Json?    @map("new_values")
+  ipAddress   String?  @map("ip_address")
+  userAgent   String?  @map("user_agent")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  @@index([tenantId])
+  @@index([entityType, entityId])
+  @@index([createdAt])
+  @@map("audit_log")
+}
