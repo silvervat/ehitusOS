@@ -515,3 +515,221 @@ export interface TopUser {
   usedBytes: bigint
   fileCount: number
 }
+
+// =============================================
+// FILE PREVIEW SYSTEM (Inline viewing)
+// =============================================
+
+/**
+ * Supported preview types for inline file viewing
+ * Without downloading the file
+ */
+export type PreviewType =
+  | 'image'      // JPG, PNG, GIF, WebP, SVG
+  | 'video'      // MP4, WebM, MOV
+  | 'audio'      // MP3, WAV, OGG
+  | 'pdf'        // PDF documents
+  | 'text'       // TXT, MD, JSON, XML, YML, LOG
+  | 'code'       // JS, TS, PY, SQL, HTML, CSS, etc.
+  | 'word'       // DOC, DOCX (via mammoth.js / docx-preview)
+  | 'excel'      // XLS, XLSX (via SheetJS)
+  | 'powerpoint' // PPT, PPTX (via pptx-preview)
+  | 'archive'    // ZIP, RAR, 7Z (show contents)
+  | 'cad'        // DWG, DXF (via AutoCAD viewer)
+  | 'model3d'    // OBJ, GLTF, STL (via three.js)
+  | 'unsupported'
+
+export interface FilePreviewConfig {
+  // Which file types are previewable
+  previewableExtensions: Record<string, PreviewType>
+
+  // Preview settings per type
+  imagePreview: ImagePreviewSettings
+  videoPreview: VideoPreviewSettings
+  documentPreview: DocumentPreviewSettings
+  codePreview: CodePreviewSettings
+  spreadsheetPreview: SpreadsheetPreviewSettings
+}
+
+export interface ImagePreviewSettings {
+  enableZoom: boolean
+  enablePan: boolean
+  enableRotate: boolean
+  enableFullscreen: boolean
+  maxZoomLevel: number
+  showExifData: boolean
+}
+
+export interface VideoPreviewSettings {
+  autoplay: boolean
+  muted: boolean
+  showControls: boolean
+  enableLoop: boolean
+  enablePictureInPicture: boolean
+  defaultQuality: 'auto' | '1080p' | '720p' | '480p'
+}
+
+export interface DocumentPreviewSettings {
+  // Word/PDF preview
+  showPageNumbers: boolean
+  enableTextSelection: boolean
+  enableSearch: boolean
+  enablePrint: boolean
+  defaultZoom: number          // 100 = 100%
+  pageFit: 'width' | 'height' | 'page'
+
+  // Word-specific
+  wordConverter: 'mammoth' | 'docx-preview' | 'office-viewer'
+}
+
+export interface CodePreviewSettings {
+  theme: 'vs-dark' | 'vs-light' | 'github-dark' | 'dracula'
+  fontSize: number
+  showLineNumbers: boolean
+  wordWrap: boolean
+  enableSyntaxHighlighting: boolean
+  maxFileSize: number          // Max file size to preview (bytes)
+}
+
+export interface SpreadsheetPreviewSettings {
+  // Excel preview
+  showSheetTabs: boolean
+  enableCellSelection: boolean
+  showGridLines: boolean
+  showFormulas: boolean
+  freezeFirstRow: boolean
+  freezeFirstColumn: boolean
+  defaultSheetIndex: number
+  maxRowsToPreview: number     // Performance limit
+  maxColumnsToPreview: number
+}
+
+/**
+ * Preview result returned by preview service
+ */
+export interface FilePreviewResult {
+  fileId: string
+  previewType: PreviewType
+  isSupported: boolean
+
+  // Preview content (depends on type)
+  content?: {
+    // For text/code/markdown
+    text?: string
+
+    // For images
+    imageUrl?: string
+    thumbnails?: {
+      small: string
+      medium: string
+      large: string
+    }
+
+    // For documents (PDF/Word)
+    pageCount?: number
+    pages?: DocumentPage[]
+
+    // For spreadsheets
+    sheets?: SpreadsheetSheet[]
+
+    // For videos
+    videoUrl?: string
+    duration?: number
+    thumbnail?: string
+
+    // For archives
+    archiveContents?: ArchiveEntry[]
+  }
+
+  // Metadata
+  originalSize: number
+  previewGeneratedAt: Date
+  expiresAt?: Date
+}
+
+export interface DocumentPage {
+  pageNumber: number
+  imageUrl?: string           // Rendered image
+  textContent?: string        // Extracted text
+  width: number
+  height: number
+}
+
+export interface SpreadsheetSheet {
+  index: number
+  name: string
+  data: (string | number | boolean | null)[][]  // 2D array
+  columnWidths: number[]
+  rowHeights: number[]
+  mergedCells?: MergedCell[]
+}
+
+export interface MergedCell {
+  startRow: number
+  startCol: number
+  endRow: number
+  endCol: number
+}
+
+export interface ArchiveEntry {
+  path: string
+  name: string
+  size: number
+  compressedSize: number
+  isDirectory: boolean
+  modifiedAt: Date
+}
+
+/**
+ * Default extension to preview type mapping
+ */
+export const DEFAULT_PREVIEW_EXTENSIONS: Record<string, PreviewType> = {
+  // Images
+  jpg: 'image', jpeg: 'image', png: 'image', gif: 'image',
+  webp: 'image', svg: 'image', bmp: 'image', ico: 'image',
+
+  // Videos
+  mp4: 'video', webm: 'video', mov: 'video', avi: 'video',
+  mkv: 'video', m4v: 'video',
+
+  // Audio
+  mp3: 'audio', wav: 'audio', ogg: 'audio', flac: 'audio',
+  m4a: 'audio', aac: 'audio',
+
+  // PDF
+  pdf: 'pdf',
+
+  // Text
+  txt: 'text', md: 'text', json: 'text', xml: 'text',
+  yml: 'text', yaml: 'text', log: 'text', csv: 'text',
+  ini: 'text', conf: 'text', env: 'text',
+
+  // Code
+  js: 'code', ts: 'code', jsx: 'code', tsx: 'code',
+  py: 'code', sql: 'code', html: 'code', css: 'code',
+  scss: 'code', less: 'code', java: 'code', c: 'code',
+  cpp: 'code', h: 'code', cs: 'code', go: 'code',
+  rs: 'code', php: 'code', rb: 'code', swift: 'code',
+  kt: 'code', sh: 'code', bash: 'code', ps1: 'code',
+  vue: 'code', svelte: 'code',
+
+  // Word
+  doc: 'word', docx: 'word', odt: 'word', rtf: 'word',
+
+  // Excel
+  xls: 'excel', xlsx: 'excel', ods: 'excel',
+
+  // PowerPoint
+  ppt: 'powerpoint', pptx: 'powerpoint', odp: 'powerpoint',
+
+  // Archives
+  zip: 'archive', rar: 'archive', '7z': 'archive',
+  tar: 'archive', gz: 'archive',
+
+  // CAD
+  dwg: 'cad', dxf: 'cad',
+
+  // 3D Models
+  obj: 'model3d', gltf: 'model3d', glb: 'model3d',
+  stl: 'model3d', fbx: 'model3d',
+}
