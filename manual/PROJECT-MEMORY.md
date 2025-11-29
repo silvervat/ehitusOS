@@ -1,11 +1,11 @@
 # RIVEST PLATFORM - PROJECT MEMORY
 > **Claude Code**: LOE SEE FAIL ESMALT! Kiire kontekst + viited detailidele.
 
-**Last Updated:** 2025-11-28 21:30
-**Session:** 8 (Form Builder)
-**Status:** All UI pages + Form Builder complete - Ready for Supabase Connection
+**Last Updated:** 2025-11-28 22:00
+**Session:** 8+ (Auth UI)
+**Status:** All UI + Form Builder + Auth complete - Ready for Supabase Connection
 **Branch:** claude/setup-rivest-platform-01DCqvSnPb6nkYDmYBkruVgi
-**Commit:** 0efe86d
+**Commit:** (pending)
 
 ---
 
@@ -72,6 +72,14 @@ COMPLETED:
      - Form settings and theme customization
      - CMS Admin "Vormid" tab integration
 
+  ✅ SESSION 8+: Auth UI (Login/Register)
+     - app/(auth)/layout.tsx - Auth layout with header/footer
+     - app/(auth)/login/ - Login page with demo credentials
+     - app/(auth)/register/ - Register with password validation
+     - app/(auth)/forgot-password/ - Password reset flow
+     - Social login buttons (Google, GitHub) - ready for OAuth
+     - Estonian language UI throughout
+
 NEXT:
   □ SESSION 9: Supabase Connection (real data)
 ```
@@ -89,6 +97,11 @@ ehitusOS/
 │       │   │   ├── page.tsx           ✅ Landing page
 │       │   │   ├── layout.tsx         ✅ Root layout + Providers
 │       │   │   ├── globals.css        ✅ Tailwind + Rivest theme
+│       │   │   ├── (auth)/
+│       │   │   │   ├── layout.tsx     ✅ Auth layout
+│       │   │   │   ├── login/         ✅ Login page
+│       │   │   │   ├── register/      ✅ Register page
+│       │   │   │   └── forgot-password/ ✅ Password reset
 │       │   │   └── (dashboard)/
 │       │   │       ├── layout.tsx     ✅ Dashboard layout w/ sidebar
 │       │   │       ├── dashboard/     ✅ Stats page
@@ -446,5 +459,5 @@ interface FormTemplate {
 
 ---
 
-**Last Updated:** 2025-11-28 21:30
-**Version:** 11.0 - Added Form Builder (SESSION 8)
+**Last Updated:** 2025-11-28 22:00
+**Version:** 12.0 - Added Auth UI pages (SESSION 8+)
