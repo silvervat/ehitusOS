@@ -1,11 +1,11 @@
 # RIVEST PLATFORM - PROJECT MEMORY
 > **Claude Code**: LOE SEE FAIL ESMALT! Kiire kontekst + viited detailidele.
 
-**Last Updated:** 2025-11-29 14:00
-**Session:** 10 (PDF Template Designer)
-**Status:** All UI + PDF Designer complete
+**Last Updated:** 2025-11-29 15:30
+**Session:** 11 (Import/Export, UI Components, Trash, Plop)
+**Status:** All Bible features complete except Supabase connection
 **Branch:** claude/review-guidelines-bible-018Tep17aEkc77kAqFKS8uFd
-**Commit:** ad91801
+**Commit:** 43423e5
 
 ---
 
@@ -109,8 +109,17 @@ COMPLETED:
      - Demo templates: Invoice, Additional Work
      - Admin sidebar "PDF Mallid" link
 
+  ✅ SESSION 11: Import/Export, UI Components, Trash, Plop
+     - lib/import-export/ - XLSX + CSV services
+     - components/import-export/ - ImportPreview, ExportDialog
+     - components/ui/stepper.tsx - Multi-step wizard
+     - components/ui/confirmation-dialog.tsx - Confirmation modals
+     - app/(dashboard)/trash/ - Prügikast (Soft delete UI)
+     - plopfile.js + plop-templates/ - Code generators
+     - Admin sidebar "Prügikast" link
+
 NEXT:
-  □ SESSION 11: Supabase Connection (real data)
+  □ SESSION 12: Supabase Connection (real data)
 ```
 
 ---
