@@ -733,3 +733,719 @@ export const DEFAULT_PREVIEW_EXTENSIONS: Record<string, PreviewType> = {
   obj: 'model3d', gltf: 'model3d', glb: 'model3d',
   stl: 'model3d', fbx: 'model3d',
 }
+
+// =============================================
+// PDF CONVERSION SYSTEM
+// =============================================
+
+/**
+ * Supported source formats for PDF conversion
+ */
+export type PdfConvertibleType =
+  | 'word'       // DOC, DOCX, ODT, RTF
+  | 'excel'      // XLS, XLSX, ODS
+  | 'powerpoint' // PPT, PPTX, ODP
+  | 'image'      // JPG, PNG, TIFF, BMP
+  | 'text'       // TXT, MD, HTML
+  | 'email'      // EML, MSG
+  | 'web'        // HTML, MHTML
+
+export interface PdfConversionRequest {
+  fileId: string
+  options: PdfConversionOptions
+}
+
+export interface PdfConversionOptions {
+  // Page setup
+  pageSize: PdfPageSize
+  orientation: 'portrait' | 'landscape'
+  margins: PdfMargins
+
+  // Quality
+  quality: 'draft' | 'standard' | 'high' | 'print'
+  dpi: 72 | 150 | 300 | 600
+
+  // Content options
+  includeComments: boolean
+  includeTrackChanges: boolean
+  includeHiddenContent: boolean
+
+  // Headers & Footers
+  header?: PdfHeaderFooter
+  footer?: PdfHeaderFooter
+
+  // Watermark
+  watermark?: PdfWatermark
+
+  // Security
+  password?: string
+  permissions?: PdfPermissions
+
+  // Image options (for image to PDF)
+  imageFit: 'original' | 'fit-page' | 'fill-page' | 'stretch'
+  combineImages: boolean  // Multiple images into one PDF
+
+  // Excel specific
+  excelOptions?: ExcelToPdfOptions
+
+  // Word specific
+  wordOptions?: WordToPdfOptions
+}
+
+export type PdfPageSize =
+  | 'a4' | 'a3' | 'a5'
+  | 'letter' | 'legal' | 'tabloid'
+  | 'custom'
+
+export interface PdfMargins {
+  top: number     // mm
+  bottom: number
+  left: number
+  right: number
+}
+
+export interface PdfHeaderFooter {
+  left?: string
+  center?: string
+  right?: string
+  fontSize: number
+  includePageNumber: boolean
+  includeDate: boolean
+  includeTotalPages: boolean
+}
+
+export interface PdfWatermark {
+  text?: string
+  imageUrl?: string
+  opacity: number        // 0-100
+  rotation: number       // degrees
+  position: 'center' | 'diagonal' | 'tile'
+  fontSize?: number
+  color?: string
+}
+
+export interface PdfPermissions {
+  allowPrinting: boolean
+  allowCopying: boolean
+  allowEditing: boolean
+  allowAnnotations: boolean
+  allowFormFilling: boolean
+}
+
+export interface ExcelToPdfOptions {
+  // Sheet selection
+  sheets: 'all' | 'active' | number[]  // Sheet indices
+
+  // Scaling
+  fitToPage: boolean
+  fitWidth: number   // Number of pages wide
+  fitHeight: number  // Number of pages tall
+  scale: number      // Percentage (10-400)
+
+  // Content
+  printGridlines: boolean
+  printHeadings: boolean  // Row & column headers
+  printArea?: string      // e.g., "A1:H50"
+
+  // Page order
+  pageOrder: 'down-then-over' | 'over-then-down'
+}
+
+export interface WordToPdfOptions {
+  // Bookmarks
+  createBookmarks: 'headings' | 'bookmarks' | 'none'
+
+  // Links
+  preserveHyperlinks: boolean
+
+  // Images
+  imageCompression: 'none' | 'low' | 'medium' | 'high'
+
+  // Fonts
+  embedFonts: boolean
+  subsetFonts: boolean
+}
+
+export interface PdfConversionResult {
+  success: boolean
+  fileId?: string          // New PDF file ID
+  downloadUrl?: string
+  pageCount?: number
+  fileSize?: number
+  error?: string
+  processingTime?: number  // ms
+}
+
+// =============================================
+// CONTEXT MENU (Right-click menu)
+// =============================================
+
+export interface ContextMenuConfig {
+  // File actions
+  fileActions: ContextMenuItem[]
+  // Folder actions
+  folderActions: ContextMenuItem[]
+  // Multi-select actions
+  bulkActions: ContextMenuItem[]
+  // Empty area actions
+  emptyAreaActions: ContextMenuItem[]
+}
+
+export interface ContextMenuItem {
+  id: string
+  label: string
+  icon?: string              // Lucide icon name
+  shortcut?: string          // e.g., "Ctrl+C"
+  action: ContextMenuAction
+  visible?: ContextMenuCondition
+  disabled?: ContextMenuCondition
+  children?: ContextMenuItem[]  // Submenu
+  dividerAfter?: boolean
+  danger?: boolean           // Red color for delete, etc.
+}
+
+export type ContextMenuAction =
+  | 'open'
+  | 'open-new-tab'
+  | 'preview'
+  | 'download'
+  | 'download-as-pdf'
+  | 'convert-to-pdf'
+  | 'share'
+  | 'share-link'
+  | 'share-internal'
+  | 'copy'
+  | 'cut'
+  | 'paste'
+  | 'duplicate'
+  | 'rename'
+  | 'move'
+  | 'move-to-folder'
+  | 'copy-to-folder'
+  | 'add-to-favorites'
+  | 'remove-from-favorites'
+  | 'add-tag'
+  | 'remove-tag'
+  | 'set-status'
+  | 'assign-to'
+  | 'add-comment'
+  | 'view-history'
+  | 'view-versions'
+  | 'restore-version'
+  | 'lock'
+  | 'unlock'
+  | 'archive'
+  | 'delete'
+  | 'delete-permanently'
+  | 'properties'
+  | 'custom'
+
+export interface ContextMenuCondition {
+  // File type conditions
+  fileTypes?: string[]       // Extension list
+  mimeTypes?: string[]
+
+  // Permission conditions
+  requiresPermission?: FilePermissionType
+
+  // State conditions
+  isOwner?: boolean
+  isLocked?: boolean
+  isFavorite?: boolean
+  hasVersions?: boolean
+
+  // Selection conditions
+  minSelected?: number
+  maxSelected?: number
+
+  // Custom condition function name
+  customCondition?: string
+}
+
+/**
+ * Default context menu configuration
+ */
+export const DEFAULT_CONTEXT_MENU: ContextMenuConfig = {
+  fileActions: [
+    { id: 'open', label: 'Ava', icon: 'FileText', shortcut: 'Enter', action: 'open' },
+    { id: 'preview', label: 'Eelvaade', icon: 'Eye', shortcut: 'Space', action: 'preview' },
+    { id: 'open-new-tab', label: 'Ava uuel vahelehel', icon: 'ExternalLink', action: 'open-new-tab', dividerAfter: true },
+
+    { id: 'download', label: 'Laadi alla', icon: 'Download', shortcut: 'Ctrl+S', action: 'download' },
+    { id: 'convert-pdf', label: 'Konverteeri PDF-iks...', icon: 'FileOutput', action: 'convert-to-pdf' },
+    { id: 'share', label: 'Jaga', icon: 'Share2', shortcut: 'Ctrl+Shift+S', action: 'share', dividerAfter: true },
+
+    { id: 'cut', label: 'Lõika', icon: 'Scissors', shortcut: 'Ctrl+X', action: 'cut' },
+    { id: 'copy', label: 'Kopeeri', icon: 'Copy', shortcut: 'Ctrl+C', action: 'copy' },
+    { id: 'duplicate', label: 'Dubleeri', icon: 'CopyPlus', action: 'duplicate' },
+    { id: 'rename', label: 'Nimeta ümber', icon: 'PenLine', shortcut: 'F2', action: 'rename' },
+    { id: 'move', label: 'Teisalda...', icon: 'FolderInput', action: 'move-to-folder', dividerAfter: true },
+
+    { id: 'favorite', label: 'Lisa lemmikutesse', icon: 'Star', action: 'add-to-favorites' },
+    { id: 'tag', label: 'Lisa silt...', icon: 'Tag', action: 'add-tag' },
+    { id: 'comment', label: 'Lisa kommentaar', icon: 'MessageSquare', action: 'add-comment', dividerAfter: true },
+
+    { id: 'versions', label: 'Versioonid', icon: 'History', action: 'view-versions' },
+    { id: 'properties', label: 'Omadused', icon: 'Info', shortcut: 'Alt+Enter', action: 'properties', dividerAfter: true },
+
+    { id: 'delete', label: 'Kustuta', icon: 'Trash2', shortcut: 'Del', action: 'delete', danger: true },
+  ],
+
+  folderActions: [
+    { id: 'open', label: 'Ava', icon: 'FolderOpen', shortcut: 'Enter', action: 'open' },
+    { id: 'open-new-tab', label: 'Ava uuel vahelehel', icon: 'ExternalLink', action: 'open-new-tab', dividerAfter: true },
+
+    { id: 'share', label: 'Jaga kausta', icon: 'Share2', action: 'share' },
+    { id: 'download-zip', label: 'Laadi alla ZIP-ina', icon: 'FileArchive', action: 'download', dividerAfter: true },
+
+    { id: 'rename', label: 'Nimeta ümber', icon: 'PenLine', shortcut: 'F2', action: 'rename' },
+    { id: 'move', label: 'Teisalda...', icon: 'FolderInput', action: 'move-to-folder', dividerAfter: true },
+
+    { id: 'properties', label: 'Omadused', icon: 'Info', action: 'properties', dividerAfter: true },
+
+    { id: 'delete', label: 'Kustuta', icon: 'Trash2', action: 'delete', danger: true },
+  ],
+
+  bulkActions: [
+    { id: 'download-zip', label: 'Laadi alla ZIP-ina', icon: 'FileArchive', action: 'download' },
+    { id: 'share', label: 'Jaga valitud faile', icon: 'Share2', action: 'share', dividerAfter: true },
+
+    { id: 'move', label: 'Teisalda...', icon: 'FolderInput', action: 'move-to-folder' },
+    { id: 'copy', label: 'Kopeeri...', icon: 'Copy', action: 'copy-to-folder' },
+    { id: 'tag', label: 'Lisa silt...', icon: 'Tag', action: 'add-tag', dividerAfter: true },
+
+    { id: 'delete', label: 'Kustuta valitud', icon: 'Trash2', action: 'delete', danger: true },
+  ],
+
+  emptyAreaActions: [
+    { id: 'new-folder', label: 'Uus kaust', icon: 'FolderPlus', action: 'custom' },
+    { id: 'upload', label: 'Laadi üles...', icon: 'Upload', action: 'custom' },
+    { id: 'paste', label: 'Kleebi', icon: 'Clipboard', shortcut: 'Ctrl+V', action: 'paste' },
+  ],
+}
+
+// =============================================
+// ADVANCED SEARCH
+// =============================================
+
+export interface AdvancedSearchQuery {
+  // Basic search
+  query?: string              // Full-text search
+  searchIn: SearchScope[]     // Where to search
+
+  // File filters
+  fileTypes?: string[]        // Extensions
+  mimeTypes?: string[]
+  minSize?: number           // Bytes
+  maxSize?: number
+
+  // Date filters
+  createdAfter?: Date
+  createdBefore?: Date
+  modifiedAfter?: Date
+  modifiedBefore?: Date
+
+  // Location
+  folderId?: string          // Specific folder
+  includeSubfolders: boolean
+  vaultId?: string
+
+  // Ownership
+  ownerId?: string
+  createdBy?: string
+  sharedWithMe?: boolean
+
+  // Tags & metadata
+  tags?: string[]
+  tagsOperator: 'and' | 'or'
+  metadata?: MetadataFilter[]
+
+  // Status & flags
+  status?: string[]
+  isFavorite?: boolean
+  isShared?: boolean
+  isPublic?: boolean
+  hasComments?: boolean
+
+  // Media specific (images/videos)
+  mediaFilters?: MediaSearchFilters
+
+  // Sorting
+  sortBy: SearchSortField
+  sortOrder: 'asc' | 'desc'
+
+  // Pagination
+  page: number
+  pageSize: number
+}
+
+export type SearchScope =
+  | 'filename'      // Search in file names
+  | 'content'       // Full-text content search
+  | 'tags'          // Search in tags
+  | 'metadata'      // Search in custom metadata
+  | 'comments'      // Search in comments
+  | 'path'          // Search in file path
+
+export type SearchSortField =
+  | 'relevance'     // Best match first
+  | 'name'          // Alphabetical
+  | 'size'          // File size
+  | 'created'       // Creation date
+  | 'modified'      // Last modified
+  | 'accessed'      // Last accessed
+  | 'type'          // File type
+
+export interface MetadataFilter {
+  field: string
+  operator: MetadataOperator
+  value: string | number | boolean | Date | string[]
+}
+
+export type MetadataOperator =
+  | 'equals'
+  | 'not_equals'
+  | 'contains'
+  | 'not_contains'
+  | 'starts_with'
+  | 'ends_with'
+  | 'greater_than'
+  | 'less_than'
+  | 'between'
+  | 'in'
+  | 'not_in'
+  | 'is_empty'
+  | 'is_not_empty'
+
+export interface MediaSearchFilters {
+  // Image dimensions
+  minWidth?: number
+  maxWidth?: number
+  minHeight?: number
+  maxHeight?: number
+  aspectRatio?: '1:1' | '4:3' | '16:9' | '3:2' | 'portrait' | 'landscape'
+
+  // Camera/EXIF
+  cameraMake?: string[]
+  cameraModel?: string[]
+  minIso?: number
+  maxIso?: number
+
+  // Location
+  hasGps?: boolean
+  nearLocation?: {
+    latitude: number
+    longitude: number
+    radiusKm: number
+  }
+
+  // Date taken
+  takenAfter?: Date
+  takenBefore?: Date
+
+  // Video specific
+  minDuration?: number    // Seconds
+  maxDuration?: number
+  hasAudio?: boolean
+}
+
+export interface SearchSuggestion {
+  type: 'file' | 'folder' | 'tag' | 'user' | 'recent' | 'saved'
+  text: string
+  icon?: string
+  fileId?: string
+  folderId?: string
+  metadata?: Record<string, unknown>
+}
+
+export interface SavedSearch {
+  id: string
+  name: string
+  query: AdvancedSearchQuery
+  createdAt: Date
+  createdBy: string
+  isShared: boolean
+  icon?: string
+  color?: string
+}
+
+/**
+ * Quick search presets
+ */
+export const QUICK_SEARCH_PRESETS: Record<string, Partial<AdvancedSearchQuery>> = {
+  // Recent files
+  recent: {
+    sortBy: 'modified',
+    sortOrder: 'desc',
+    pageSize: 50,
+  },
+
+  // My files
+  myFiles: {
+    sharedWithMe: false,
+    sortBy: 'modified',
+    sortOrder: 'desc',
+  },
+
+  // Shared with me
+  sharedWithMe: {
+    sharedWithMe: true,
+    sortBy: 'modified',
+    sortOrder: 'desc',
+  },
+
+  // Images only
+  images: {
+    fileTypes: ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg', 'bmp'],
+    sortBy: 'modified',
+    sortOrder: 'desc',
+  },
+
+  // Documents
+  documents: {
+    fileTypes: ['pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'txt'],
+    sortBy: 'modified',
+    sortOrder: 'desc',
+  },
+
+  // Large files (>100MB)
+  largeFiles: {
+    minSize: 104857600,
+    sortBy: 'size',
+    sortOrder: 'desc',
+  },
+
+  // Favorites
+  favorites: {
+    isFavorite: true,
+    sortBy: 'name',
+    sortOrder: 'asc',
+  },
+}
+
+// =============================================
+// CONTENT INDEXING SYSTEM (Full-text search)
+// =============================================
+
+/**
+ * Background content indexing for full-text search
+ * Indexes file contents for fast searching inside documents
+ */
+export interface ContentIndexingConfig {
+  // Which file types to index
+  indexableTypes: string[]
+
+  // Max file size to index (bytes)
+  maxFileSizeToIndex: number   // Default: 50MB
+
+  // OCR settings for images/PDFs
+  enableOcr: boolean
+  ocrLanguages: string[]       // ['est', 'eng', 'rus']
+
+  // Background processing
+  batchSize: number            // Files per batch
+  processingInterval: number   // Seconds between batches
+  maxConcurrentJobs: number
+
+  // Index refresh
+  autoReindexOnUpdate: boolean
+  fullReindexSchedule: string  // Cron expression
+}
+
+export interface ContentIndexJob {
+  id: string
+  fileId: string
+  vaultId: string
+  status: IndexJobStatus
+  progress: number           // 0-100
+
+  // Timing
+  createdAt: Date
+  startedAt?: Date
+  completedAt?: Date
+
+  // Results
+  extractedText?: string
+  wordCount?: number
+  pageCount?: number
+  language?: string
+  error?: string
+
+  // OCR specific
+  ocrApplied: boolean
+  ocrConfidence?: number     // 0-100
+}
+
+export type IndexJobStatus =
+  | 'pending'
+  | 'processing'
+  | 'completed'
+  | 'failed'
+  | 'skipped'
+
+export interface ContentIndexStats {
+  totalFiles: number
+  indexedFiles: number
+  pendingFiles: number
+  failedFiles: number
+  skippedFiles: number
+  totalWords: number
+  indexSize: number          // Bytes
+  lastFullIndex: Date
+  averageIndexTime: number   // ms per file
+}
+
+/**
+ * Text extraction configuration per file type
+ */
+export interface TextExtractorConfig {
+  // PDF extraction
+  pdf: {
+    extractMethod: 'text-layer' | 'ocr' | 'hybrid'
+    preserveFormatting: boolean
+    extractTables: boolean
+    extractImages: boolean
+  }
+
+  // Office documents
+  word: {
+    extractComments: boolean
+    extractRevisions: boolean
+    extractHeaders: boolean
+    extractFooters: boolean
+  }
+
+  excel: {
+    extractAllSheets: boolean
+    extractFormulas: boolean
+    extractComments: boolean
+    sheetSeparator: string     // Text between sheets
+  }
+
+  powerpoint: {
+    extractNotes: boolean
+    extractComments: boolean
+    slideSeparator: string
+  }
+
+  // Images (OCR)
+  image: {
+    preprocess: boolean        // Enhance before OCR
+    deskew: boolean
+    removeNoise: boolean
+    minConfidence: number      // Min OCR confidence (0-100)
+  }
+
+  // Email
+  email: {
+    extractAttachments: boolean
+    includeHeaders: boolean
+    extractHtml: boolean
+  }
+}
+
+/**
+ * Search result with content highlights
+ */
+export interface ContentSearchResult {
+  fileId: string
+  fileName: string
+  filePath: string
+  mimeType: string
+
+  // Match info
+  score: number              // Relevance score
+  matchCount: number         // Number of matches
+
+  // Highlighted excerpts
+  highlights: ContentHighlight[]
+
+  // File metadata
+  createdAt: Date
+  modifiedAt: Date
+  size: number
+  owner: string
+}
+
+export interface ContentHighlight {
+  // Which field matched
+  field: 'content' | 'filename' | 'metadata' | 'tags'
+
+  // Text excerpt with highlights
+  excerpt: string            // "...the <mark>search term</mark> was found..."
+  preContext: string         // Text before match
+  matchedText: string        // The actual match
+  postContext: string        // Text after match
+
+  // Position info
+  pageNumber?: number        // For documents
+  sheetName?: string         // For Excel
+  lineNumber?: number        // For text files
+}
+
+/**
+ * Indexable file types with their extractors
+ */
+export const INDEXABLE_FILE_TYPES: Record<string, string> = {
+  // Documents - Full text extraction
+  pdf: 'pdf-extractor',
+  doc: 'word-extractor',
+  docx: 'word-extractor',
+  odt: 'odf-extractor',
+  rtf: 'rtf-extractor',
+
+  // Spreadsheets
+  xls: 'excel-extractor',
+  xlsx: 'excel-extractor',
+  ods: 'odf-extractor',
+  csv: 'csv-extractor',
+
+  // Presentations
+  ppt: 'powerpoint-extractor',
+  pptx: 'powerpoint-extractor',
+  odp: 'odf-extractor',
+
+  // Text files - Direct read
+  txt: 'text-extractor',
+  md: 'text-extractor',
+  json: 'text-extractor',
+  xml: 'text-extractor',
+  html: 'html-extractor',
+  htm: 'html-extractor',
+  css: 'text-extractor',
+  js: 'text-extractor',
+  ts: 'text-extractor',
+  py: 'text-extractor',
+  sql: 'text-extractor',
+  log: 'text-extractor',
+  ini: 'text-extractor',
+  yml: 'text-extractor',
+  yaml: 'text-extractor',
+
+  // Email
+  eml: 'email-extractor',
+  msg: 'email-extractor',
+
+  // Images - OCR required
+  jpg: 'ocr-extractor',
+  jpeg: 'ocr-extractor',
+  png: 'ocr-extractor',
+  tiff: 'ocr-extractor',
+  tif: 'ocr-extractor',
+  bmp: 'ocr-extractor',
+}
+
+/**
+ * Default content indexing configuration
+ */
+export const DEFAULT_INDEXING_CONFIG: ContentIndexingConfig = {
+  indexableTypes: Object.keys(INDEXABLE_FILE_TYPES),
+  maxFileSizeToIndex: 52428800,  // 50MB
+  enableOcr: true,
+  ocrLanguages: ['est', 'eng', 'rus'],
+  batchSize: 10,
+  processingInterval: 60,        // 1 minute
+  maxConcurrentJobs: 4,
+  autoReindexOnUpdate: true,
+  fullReindexSchedule: '0 2 * * 0',  // Sunday 2 AM
+}
