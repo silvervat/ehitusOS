@@ -1624,3 +1624,841 @@ export interface BatchUploadError {
   code: string
   retryable: boolean
 }
+
+// =============================================
+// MOBILE UI CONFIGURATION
+// =============================================
+
+/**
+ * Mobile-optimized file manager settings
+ * Ensures comfortable usage on phones and tablets
+ */
+export interface MobileConfig {
+  // Breakpoints
+  breakpoints: {
+    mobile: number      // < 640px
+    tablet: number      // < 1024px
+    desktop: number     // >= 1024px
+  }
+
+  // Mobile-specific settings
+  mobile: MobileViewSettings
+  tablet: TabletViewSettings
+
+  // Touch gestures
+  gestures: TouchGestureConfig
+
+  // Bottom sheet actions (mobile)
+  bottomSheet: BottomSheetConfig
+
+  // Pull to refresh
+  pullToRefresh: boolean
+
+  // Offline support
+  offlineMode: OfflineModeConfig
+}
+
+export interface MobileViewSettings {
+  // Default view on mobile
+  defaultView: 'list' | 'grid'
+
+  // Grid settings for mobile
+  gridColumns: 2 | 3 | 4
+  iconSize: 'small' | 'medium'
+
+  // List settings for mobile
+  listCompact: boolean
+  showThumbnails: boolean
+
+  // Navigation
+  showBottomNav: boolean
+  showFloatingActionButton: boolean
+  fabActions: MobileFabAction[]
+
+  // Header
+  stickyHeader: boolean
+  collapsibleHeader: boolean
+
+  // Selection
+  enableLongPressSelect: boolean
+  showSelectionToolbar: boolean
+
+  // Swipe actions
+  enableSwipeActions: boolean
+  swipeLeftAction: MobileSwipeAction
+  swipeRightAction: MobileSwipeAction
+}
+
+export interface TabletViewSettings {
+  // Layout
+  showSidebar: boolean
+  sidebarWidth: number
+  splitView: boolean          // Master-detail view
+
+  // Default view
+  defaultView: FileViewType
+
+  // Grid
+  gridColumns: 3 | 4 | 5 | 6
+}
+
+export type MobileFabAction =
+  | 'upload'
+  | 'new-folder'
+  | 'new-file'
+  | 'camera'
+  | 'scan-document'
+
+export type MobileSwipeAction =
+  | 'delete'
+  | 'share'
+  | 'favorite'
+  | 'download'
+  | 'rename'
+  | 'none'
+
+export interface TouchGestureConfig {
+  // Pinch to zoom (gallery)
+  enablePinchZoom: boolean
+
+  // Double tap
+  doubleTapAction: 'open' | 'preview' | 'select' | 'none'
+
+  // Long press
+  longPressDelay: number       // ms
+  longPressAction: 'select' | 'context-menu' | 'none'
+
+  // Swipe
+  swipeThreshold: number       // px
+  swipeVelocity: number        // px/ms
+}
+
+export interface BottomSheetConfig {
+  // File actions sheet
+  fileActions: MobileActionItem[]
+
+  // Folder actions sheet
+  folderActions: MobileActionItem[]
+
+  // Sort/filter sheet
+  showSortOptions: boolean
+  showFilterOptions: boolean
+
+  // Upload options
+  uploadOptions: MobileUploadOption[]
+}
+
+export interface MobileActionItem {
+  id: string
+  label: string
+  labelEt: string              // Estonian
+  icon: string
+  action: ContextMenuAction
+  danger?: boolean
+}
+
+export type MobileUploadOption =
+  | 'files'           // File picker
+  | 'camera'          // Take photo
+  | 'gallery'         // Photo library
+  | 'scan'            // Document scanner
+  | 'audio'           // Record audio
+
+export interface OfflineModeConfig {
+  // Enable offline access
+  enabled: boolean
+
+  // What to cache
+  cacheRecentFiles: boolean
+  cacheFavorites: boolean
+  cacheSize: number            // Max cache size in bytes
+
+  // Sync settings
+  syncOnWifi: boolean
+  syncOnMobile: boolean
+  backgroundSync: boolean
+
+  // Conflict resolution
+  offlineConflictStrategy: 'local-wins' | 'server-wins' | 'ask'
+}
+
+/**
+ * Default mobile configuration
+ */
+export const DEFAULT_MOBILE_CONFIG: MobileConfig = {
+  breakpoints: {
+    mobile: 640,
+    tablet: 1024,
+    desktop: 1024,
+  },
+
+  mobile: {
+    defaultView: 'list',
+    gridColumns: 3,
+    iconSize: 'medium',
+    listCompact: false,
+    showThumbnails: true,
+    showBottomNav: true,
+    showFloatingActionButton: true,
+    fabActions: ['upload', 'new-folder', 'camera'],
+    stickyHeader: true,
+    collapsibleHeader: true,
+    enableLongPressSelect: true,
+    showSelectionToolbar: true,
+    enableSwipeActions: true,
+    swipeLeftAction: 'delete',
+    swipeRightAction: 'share',
+  },
+
+  tablet: {
+    showSidebar: true,
+    sidebarWidth: 280,
+    splitView: true,
+    defaultView: 'grid',
+    gridColumns: 4,
+  },
+
+  gestures: {
+    enablePinchZoom: true,
+    doubleTapAction: 'preview',
+    longPressDelay: 500,
+    longPressAction: 'context-menu',
+    swipeThreshold: 50,
+    swipeVelocity: 0.3,
+  },
+
+  bottomSheet: {
+    fileActions: [
+      { id: 'preview', label: 'Preview', labelEt: 'Eelvaade', icon: 'Eye', action: 'preview' },
+      { id: 'share', label: 'Share', labelEt: 'Jaga', icon: 'Share2', action: 'share' },
+      { id: 'download', label: 'Download', labelEt: 'Laadi alla', icon: 'Download', action: 'download' },
+      { id: 'favorite', label: 'Add to favorites', labelEt: 'Lisa lemmikutesse', icon: 'Star', action: 'add-to-favorites' },
+      { id: 'rename', label: 'Rename', labelEt: 'Nimeta ümber', icon: 'PenLine', action: 'rename' },
+      { id: 'move', label: 'Move', labelEt: 'Teisalda', icon: 'FolderInput', action: 'move-to-folder' },
+      { id: 'delete', label: 'Delete', labelEt: 'Kustuta', icon: 'Trash2', action: 'delete', danger: true },
+    ],
+    folderActions: [
+      { id: 'open', label: 'Open', labelEt: 'Ava', icon: 'FolderOpen', action: 'open' },
+      { id: 'share', label: 'Share', labelEt: 'Jaga', icon: 'Share2', action: 'share' },
+      { id: 'rename', label: 'Rename', labelEt: 'Nimeta ümber', icon: 'PenLine', action: 'rename' },
+      { id: 'delete', label: 'Delete', labelEt: 'Kustuta', icon: 'Trash2', action: 'delete', danger: true },
+    ],
+    showSortOptions: true,
+    showFilterOptions: true,
+    uploadOptions: ['files', 'camera', 'gallery', 'scan'],
+  },
+
+  pullToRefresh: true,
+
+  offlineMode: {
+    enabled: true,
+    cacheRecentFiles: true,
+    cacheFavorites: true,
+    cacheSize: 524288000,      // 500MB
+    syncOnWifi: true,
+    syncOnMobile: false,
+    backgroundSync: true,
+    offlineConflictStrategy: 'ask',
+  },
+}
+
+// =============================================
+// NEW FILE CREATION SYSTEM
+// =============================================
+
+/**
+ * Supported file types that can be created in the system
+ */
+export type CreatableFileType =
+  | 'document'        // Word document
+  | 'spreadsheet'     // Excel spreadsheet
+  | 'presentation'    // PowerPoint
+  | 'text'            // Plain text
+  | 'markdown'        // Markdown file
+  | 'note'            // Rich text note
+  | 'form'            // Form/survey
+  | 'diagram'         // Diagram/flowchart
+  | 'whiteboard'      // Collaborative whiteboard
+  | 'code'            // Code file
+  | 'json'            // JSON file
+  | 'html'            // HTML file
+  | 'css'             // CSS file
+
+export interface FileCreationConfig {
+  // Available file types for creation
+  enabledTypes: CreatableFileType[]
+
+  // Templates per type
+  templates: FileTemplate[]
+
+  // Default settings
+  defaultLocation: 'current-folder' | 'my-files' | 'ask'
+  openAfterCreate: boolean
+
+  // Naming
+  defaultNamePattern: string   // e.g., "Untitled {type} {n}"
+  askForName: boolean
+}
+
+export interface FileTemplate {
+  id: string
+  type: CreatableFileType
+  name: string
+  nameEt: string              // Estonian name
+  description?: string
+  descriptionEt?: string
+  icon: string
+  color?: string
+
+  // Template content
+  content?: string            // For text-based files
+  templateFileId?: string     // Reference to template file
+
+  // Metadata
+  isDefault: boolean
+  isBuiltIn: boolean
+  category?: string
+  tags?: string[]
+
+  // Access
+  visibleToGroups?: string[]  // Empty = all groups
+}
+
+export interface NewFileDialogData {
+  // Current step
+  step: 'select-type' | 'select-template' | 'enter-name' | 'creating'
+
+  // Selected values
+  selectedType?: CreatableFileType
+  selectedTemplate?: FileTemplate
+  fileName: string
+  targetFolderId?: string
+
+  // Options
+  openAfterCreate: boolean
+
+  // State
+  isCreating: boolean
+  error?: string
+}
+
+export interface FileCreationResult {
+  success: boolean
+  fileId?: string
+  fileName?: string
+  filePath?: string
+  error?: string
+}
+
+/**
+ * File type definitions with metadata
+ */
+export const FILE_TYPE_DEFINITIONS: Record<CreatableFileType, FileTypeDefinition> = {
+  document: {
+    type: 'document',
+    name: 'Document',
+    nameEt: 'Dokument',
+    description: 'Word document for reports, letters, etc.',
+    descriptionEt: 'Word dokument aruannete, kirjade jms jaoks',
+    icon: 'FileText',
+    color: '#2b579a',
+    extension: 'docx',
+    mimeType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+  },
+  spreadsheet: {
+    type: 'spreadsheet',
+    name: 'Spreadsheet',
+    nameEt: 'Tabel',
+    description: 'Excel spreadsheet for data and calculations',
+    descriptionEt: 'Excel tabel andmete ja arvutuste jaoks',
+    icon: 'Table',
+    color: '#217346',
+    extension: 'xlsx',
+    mimeType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  },
+  presentation: {
+    type: 'presentation',
+    name: 'Presentation',
+    nameEt: 'Esitlus',
+    description: 'PowerPoint presentation',
+    descriptionEt: 'PowerPoint esitlus',
+    icon: 'Presentation',
+    color: '#d24726',
+    extension: 'pptx',
+    mimeType: 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+  },
+  text: {
+    type: 'text',
+    name: 'Text File',
+    nameEt: 'Tekstifail',
+    description: 'Plain text file',
+    descriptionEt: 'Lihtne tekstifail',
+    icon: 'FileType',
+    color: '#6b7280',
+    extension: 'txt',
+    mimeType: 'text/plain',
+  },
+  markdown: {
+    type: 'markdown',
+    name: 'Markdown',
+    nameEt: 'Markdown',
+    description: 'Markdown formatted text',
+    descriptionEt: 'Markdown vormingus tekst',
+    icon: 'FileCode',
+    color: '#083d77',
+    extension: 'md',
+    mimeType: 'text/markdown',
+  },
+  note: {
+    type: 'note',
+    name: 'Note',
+    nameEt: 'Märkmed',
+    description: 'Rich text note with formatting',
+    descriptionEt: 'Rikkalik tekst märkmetega',
+    icon: 'StickyNote',
+    color: '#fbbf24',
+    extension: 'html',
+    mimeType: 'text/html',
+  },
+  form: {
+    type: 'form',
+    name: 'Form',
+    nameEt: 'Vorm',
+    description: 'Create surveys and forms',
+    descriptionEt: 'Loo küsitlusi ja vorme',
+    icon: 'ClipboardList',
+    color: '#8b5cf6',
+    extension: 'json',
+    mimeType: 'application/json',
+  },
+  diagram: {
+    type: 'diagram',
+    name: 'Diagram',
+    nameEt: 'Diagramm',
+    description: 'Flowcharts and diagrams',
+    descriptionEt: 'Vooskeemid ja diagrammid',
+    icon: 'GitBranch',
+    color: '#f97316',
+    extension: 'drawio',
+    mimeType: 'application/xml',
+  },
+  whiteboard: {
+    type: 'whiteboard',
+    name: 'Whiteboard',
+    nameEt: 'Tahvel',
+    description: 'Collaborative whiteboard',
+    descriptionEt: 'Koostöö tahvel',
+    icon: 'PenTool',
+    color: '#06b6d4',
+    extension: 'excalidraw',
+    mimeType: 'application/json',
+  },
+  code: {
+    type: 'code',
+    name: 'Code File',
+    nameEt: 'Koodifail',
+    description: 'Source code file',
+    descriptionEt: 'Lähtekoodifail',
+    icon: 'Code',
+    color: '#22c55e',
+    extension: 'js',
+    mimeType: 'text/javascript',
+  },
+  json: {
+    type: 'json',
+    name: 'JSON File',
+    nameEt: 'JSON fail',
+    description: 'JSON data file',
+    descriptionEt: 'JSON andmefail',
+    icon: 'Braces',
+    color: '#eab308',
+    extension: 'json',
+    mimeType: 'application/json',
+  },
+  html: {
+    type: 'html',
+    name: 'HTML File',
+    nameEt: 'HTML fail',
+    description: 'HTML web page',
+    descriptionEt: 'HTML veebileht',
+    icon: 'Globe',
+    color: '#e34c26',
+    extension: 'html',
+    mimeType: 'text/html',
+  },
+  css: {
+    type: 'css',
+    name: 'CSS File',
+    nameEt: 'CSS fail',
+    description: 'CSS stylesheet',
+    descriptionEt: 'CSS stiilileht',
+    icon: 'Palette',
+    color: '#264de4',
+    extension: 'css',
+    mimeType: 'text/css',
+  },
+}
+
+export interface FileTypeDefinition {
+  type: CreatableFileType
+  name: string
+  nameEt: string
+  description: string
+  descriptionEt: string
+  icon: string
+  color: string
+  extension: string
+  mimeType: string
+}
+
+/**
+ * Default templates for new files
+ */
+export const DEFAULT_FILE_TEMPLATES: FileTemplate[] = [
+  // Documents
+  {
+    id: 'blank-document',
+    type: 'document',
+    name: 'Blank Document',
+    nameEt: 'Tühi dokument',
+    icon: 'FileText',
+    isDefault: true,
+    isBuiltIn: true,
+    category: 'basic',
+  },
+  {
+    id: 'report-template',
+    type: 'document',
+    name: 'Report',
+    nameEt: 'Aruanne',
+    description: 'Professional report template',
+    descriptionEt: 'Professionaalne aruande mall',
+    icon: 'FileText',
+    isDefault: false,
+    isBuiltIn: true,
+    category: 'business',
+  },
+  {
+    id: 'letter-template',
+    type: 'document',
+    name: 'Letter',
+    nameEt: 'Kiri',
+    description: 'Formal letter template',
+    descriptionEt: 'Ametlik kirja mall',
+    icon: 'Mail',
+    isDefault: false,
+    isBuiltIn: true,
+    category: 'business',
+  },
+
+  // Spreadsheets
+  {
+    id: 'blank-spreadsheet',
+    type: 'spreadsheet',
+    name: 'Blank Spreadsheet',
+    nameEt: 'Tühi tabel',
+    icon: 'Table',
+    isDefault: true,
+    isBuiltIn: true,
+    category: 'basic',
+  },
+  {
+    id: 'budget-template',
+    type: 'spreadsheet',
+    name: 'Budget',
+    nameEt: 'Eelarve',
+    description: 'Budget tracking spreadsheet',
+    descriptionEt: 'Eelarve jälgimise tabel',
+    icon: 'DollarSign',
+    isDefault: false,
+    isBuiltIn: true,
+    category: 'finance',
+  },
+
+  // Presentations
+  {
+    id: 'blank-presentation',
+    type: 'presentation',
+    name: 'Blank Presentation',
+    nameEt: 'Tühi esitlus',
+    icon: 'Presentation',
+    isDefault: true,
+    isBuiltIn: true,
+    category: 'basic',
+  },
+
+  // Notes
+  {
+    id: 'blank-note',
+    type: 'note',
+    name: 'Quick Note',
+    nameEt: 'Kiirmärkmed',
+    icon: 'StickyNote',
+    isDefault: true,
+    isBuiltIn: true,
+    category: 'basic',
+  },
+  {
+    id: 'meeting-notes',
+    type: 'note',
+    name: 'Meeting Notes',
+    nameEt: 'Koosoleku märkmed',
+    description: 'Template for meeting notes',
+    descriptionEt: 'Koosoleku märkmete mall',
+    icon: 'Users',
+    isDefault: false,
+    isBuiltIn: true,
+    category: 'business',
+  },
+
+  // Markdown
+  {
+    id: 'blank-markdown',
+    type: 'markdown',
+    name: 'Markdown File',
+    nameEt: 'Markdown fail',
+    icon: 'FileCode',
+    content: '# Title\n\nStart writing here...\n',
+    isDefault: true,
+    isBuiltIn: true,
+    category: 'basic',
+  },
+
+  // Text
+  {
+    id: 'blank-text',
+    type: 'text',
+    name: 'Text File',
+    nameEt: 'Tekstifail',
+    icon: 'FileType',
+    content: '',
+    isDefault: true,
+    isBuiltIn: true,
+    category: 'basic',
+  },
+]
+
+/**
+ * Default file creation configuration
+ */
+export const DEFAULT_FILE_CREATION_CONFIG: FileCreationConfig = {
+  enabledTypes: [
+    'document',
+    'spreadsheet',
+    'presentation',
+    'note',
+    'markdown',
+    'text',
+  ],
+  templates: DEFAULT_FILE_TEMPLATES,
+  defaultLocation: 'current-folder',
+  openAfterCreate: true,
+  defaultNamePattern: 'Uus {type}',
+  askForName: true,
+}
+
+// =============================================
+// LARGE FILE UPLOAD (1GB+)
+// =============================================
+
+/**
+ * Configuration for large file uploads (up to 1GB+)
+ */
+export interface LargeFileUploadConfig {
+  // Size limits
+  maxFileSize: number              // Max single file size (bytes)
+  maxTotalUploadSize: number       // Max total upload size per session
+
+  // Chunking settings
+  enableChunkedUpload: boolean
+  chunkSize: number                // Chunk size in bytes (default 10MB)
+  maxConcurrentChunks: number      // Parallel chunk uploads
+  retryAttempts: number            // Retry failed chunks
+  retryDelay: number               // Delay between retries (ms)
+
+  // Resumable uploads
+  enableResumable: boolean
+  resumeExpiry: number             // How long to keep partial uploads (hours)
+
+  // Progress & feedback
+  showDetailedProgress: boolean
+  showUploadSpeed: boolean
+  showTimeRemaining: boolean
+
+  // Background upload
+  enableBackgroundUpload: boolean
+  continueOnAppClose: boolean      // Mobile - continue in background
+
+  // Optimization
+  enableCompression: boolean
+  compressionTypes: string[]       // File types to compress
+  compressionLevel: 'low' | 'medium' | 'high'
+
+  // Validation
+  validateBeforeUpload: boolean
+  scanForViruses: boolean
+}
+
+export interface ChunkedUploadSession {
+  id: string
+  fileId: string
+  fileName: string
+  fileSize: number
+  mimeType: string
+
+  // Chunking info
+  chunkSize: number
+  totalChunks: number
+  uploadedChunks: number[]
+  failedChunks: number[]
+
+  // Progress
+  uploadedBytes: number
+  progress: number                 // 0-100
+
+  // Timing
+  startedAt: Date
+  lastActivityAt: Date
+  expiresAt: Date
+
+  // Status
+  status: ChunkedUploadStatus
+  error?: string
+
+  // Metadata
+  targetVaultId: string
+  targetFolderId?: string
+  uploadedBy: string
+}
+
+export type ChunkedUploadStatus =
+  | 'initializing'
+  | 'uploading'
+  | 'paused'
+  | 'resuming'
+  | 'processing'       // Server processing after upload
+  | 'completed'
+  | 'failed'
+  | 'cancelled'
+  | 'expired'
+
+export interface UploadProgress {
+  // File info
+  fileName: string
+  fileSize: number
+
+  // Progress
+  uploadedBytes: number
+  progress: number                 // 0-100
+
+  // Speed
+  speed: number                    // bytes/second
+  averageSpeed: number
+
+  // Time
+  elapsedTime: number              // ms
+  remainingTime: number            // ms (estimated)
+
+  // Chunks (for chunked uploads)
+  currentChunk?: number
+  totalChunks?: number
+
+  // Status
+  status: 'preparing' | 'uploading' | 'processing' | 'completed' | 'error'
+  error?: string
+}
+
+/**
+ * Default large file upload configuration
+ * Supports files up to 1GB
+ */
+export const DEFAULT_LARGE_UPLOAD_CONFIG: LargeFileUploadConfig = {
+  // 1GB max file size
+  maxFileSize: 1073741824,         // 1GB
+  maxTotalUploadSize: 5368709120,  // 5GB per session
+
+  // Chunking for files > 10MB
+  enableChunkedUpload: true,
+  chunkSize: 10485760,             // 10MB chunks
+  maxConcurrentChunks: 4,
+  retryAttempts: 3,
+  retryDelay: 2000,
+
+  // Resumable
+  enableResumable: true,
+  resumeExpiry: 72,                // 72 hours
+
+  // Progress
+  showDetailedProgress: true,
+  showUploadSpeed: true,
+  showTimeRemaining: true,
+
+  // Background
+  enableBackgroundUpload: true,
+  continueOnAppClose: true,
+
+  // Optimization
+  enableCompression: false,
+  compressionTypes: [],
+  compressionLevel: 'medium',
+
+  // Validation
+  validateBeforeUpload: true,
+  scanForViruses: true,
+}
+
+/**
+ * Size thresholds for upload strategies
+ */
+export const UPLOAD_SIZE_THRESHOLDS = {
+  // Simple upload (no chunking)
+  simpleUpload: 10485760,          // < 10MB
+
+  // Chunked upload
+  chunkedUpload: 104857600,        // 10MB - 100MB
+
+  // Large file (show detailed progress)
+  largeFile: 104857600,            // > 100MB
+
+  // Very large file (require confirmation)
+  veryLargeFile: 524288000,        // > 500MB
+
+  // Maximum supported
+  maxSupported: 1073741824,        // 1GB
+}
+
+/**
+ * Human-readable size formatter
+ */
+export function formatFileSize(bytes: number): string {
+  if (bytes === 0) return '0 B'
+
+  const units = ['B', 'KB', 'MB', 'GB', 'TB']
+  const k = 1024
+  const i = Math.floor(Math.log(bytes) / Math.log(k))
+
+  return `${parseFloat((bytes / Math.pow(k, i)).toFixed(2))} ${units[i]}`
+}
+
+/**
+ * Calculate upload time estimate
+ */
+export function estimateUploadTime(
+  fileSize: number,
+  speedBps: number
+): { seconds: number; formatted: string } {
+  if (speedBps <= 0) return { seconds: 0, formatted: 'Arvutamine...' }
+
+  const seconds = Math.ceil(fileSize / speedBps)
+
+  if (seconds < 60) {
+    return { seconds, formatted: `${seconds} sek` }
+  } else if (seconds < 3600) {
+    const mins = Math.ceil(seconds / 60)
+    return { seconds, formatted: `${mins} min` }
+  } else {
+    const hours = Math.floor(seconds / 3600)
+    const mins = Math.ceil((seconds % 3600) / 60)
+    return { seconds, formatted: `${hours}h ${mins}min` }
+  }
+}
