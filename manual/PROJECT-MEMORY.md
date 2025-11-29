@@ -1,11 +1,11 @@
 # RIVEST PLATFORM - PROJECT MEMORY
 > **Claude Code**: LOE SEE FAIL ESMALT! Kiire kontekst + viited detailidele.
 
-**Last Updated:** 2024-11-27 17:00  
-**Session:** 4  
-**Status:** CMS + Collaborative Docs Setup  
-**Branch:** main  
-**Commit:** xyz789
+**Last Updated:** 2025-11-28 22:30
+**Session:** 8++ (Dashboard Charts)
+**Status:** All UI + Form Builder + Auth + Charts complete
+**Branch:** claude/setup-rivest-platform-01DCqvSnPb6nkYDmYBkruVgi
+**Commit:** f2d5dd5
 
 ---
 
@@ -14,150 +14,207 @@
 ```yaml
 COMPLETED:
   ✅ SESSION 1: Monorepo (Turborepo + pnpm)
-  ✅ SESSION 2: Database (tenants, projects, RLS)
-  ✅ SESSION 3: Projects List (TanStack Table)
+     - apps/web/ Next.js 14 with App Router
+     - packages/ui/ shadcn/ui components
+     - packages/db/ Prisma schema
+     - packages/types/ TypeScript types
+     - .github/workflows/ci.yml
 
-IN PROGRESS:
-  ⏳ SESSION 4: CMS + Collaborative Docs
-     Phase: Database schema extension
-     File: supabase/migrations/003_cms_system.sql
+  ✅ SESSION 2: Supabase Client + Hooks
+     - lib/supabase/ (client, server, middleware)
+     - lib/providers.tsx (TanStack Query)
+     - lib/tenant-context.tsx
+     - hooks/use-feature.ts
+     - hooks/use-projects.ts
+
+  ✅ SESSION 3: Projects List (TanStack Table)
+     - components/projects/projects-table.tsx
+     - Sorting, filtering, pagination
+     - Mock data for demo
+
+  ✅ SESSION 4: CMS System Foundation
+     - supabase/migrations/003_cms_system.sql
+     - packages/types/src/cms.types.ts
+     - components/admin/cms/dynamic-fields-manager.tsx
+     - app/(dashboard)/admin/cms/page.tsx
+     - Admin sidebar navigation
+
+  ✅ SESSION 5: Dynamic Fields UI
+     - components/admin/cms/dynamic-field-dialog.tsx
+     - components/admin/cms/dynamic-field-renderer.tsx
+     - Dialog integration with DynamicFieldsManager
+     - Field type editors (text, select, date, etc.)
+
+  ✅ SESSION 6: Workflow Builder
+     - components/admin/cms/workflow-builder.tsx
+     - ReactFlow visual state machine editor
+     - Custom StateNode component
+     - Mock workflows for projects/invoices
+     - Drag-to-connect transitions
+
+  ✅ SESSION 7: Document Editor
+     - components/docs/document-editor.tsx
+     - Tiptap rich text editor with toolbar
+     - app/(dashboard)/documents/ - list page
+     - app/(dashboard)/documents/[id]/ - editor page
+     - Tables, images, links, headings support
+     - Auto-save and version tracking ready
+
+  ✅ SESSION 8: Form Builder (JotForm style)
+     - components/admin/form-builder/ - Full form builder
+     - Drag-and-drop field palette (dnd-kit)
+     - Field types: text, email, phone, number, textarea
+     - Choice fields: select, radio, checkbox, multi-select
+     - Date/time fields: date, time, datetime
+     - Advanced: file upload, signature, rating, slider
+     - Display: heading, paragraph, divider
+     - Field properties panel with validation
+     - Form settings and theme customization
+     - CMS Admin "Vormid" tab integration
+
+  ✅ SESSION 8+: Auth UI (Login/Register)
+     - app/(auth)/layout.tsx - Auth layout with header/footer
+     - app/(auth)/login/ - Login page with demo credentials
+     - app/(auth)/register/ - Register with password validation
+     - app/(auth)/forgot-password/ - Password reset flow
+     - Social login buttons (Google, GitHub) - ready for OAuth
+     - Estonian language UI throughout
+
+  ✅ SESSION 8++: Dashboard Charts (recharts)
+     - Revenue vs Expenses AreaChart (12 months)
+     - Project Status PieChart (donut style)
+     - Monthly Projects BarChart (started vs completed)
+     - Enhanced stat cards with trend indicators
+     - Color-coded activity items by type
+     - Estonian language labels
 
 NEXT:
-  □ SESSION 5: Dynamic Fields UI
-  □ SESSION 6: Workflow Builder
-  □ SESSION 7: Document Editor
+  □ SESSION 9: Supabase Connection (real data)
 ```
 
 ---
 
-## 📁 PROJECT STRUCTURE
+## 📁 PROJECT STRUCTURE (ACTUAL)
 
 ```
-rivest-platform/
+ehitusOS/
 ├── apps/
 │   └── web/                           # Next.js 14 App Router
 │       ├── src/
 │       │   ├── app/
-│       │   │   ├── (dashboard)/
-│       │   │   │   ├── projects/      ✅ Done
-│       │   │   │   ├── docs/          ⏳ Next
-│       │   │   │   └── admin/cms/     ⏳ Next
-│       │   │   └── api/
+│       │   │   ├── page.tsx           ✅ Landing page
+│       │   │   ├── layout.tsx         ✅ Root layout + Providers
+│       │   │   ├── globals.css        ✅ Tailwind + Rivest theme
+│       │   │   ├── (auth)/
+│       │   │   │   ├── layout.tsx     ✅ Auth layout
+│       │   │   │   ├── login/         ✅ Login page
+│       │   │   │   ├── register/      ✅ Register page
+│       │   │   │   └── forgot-password/ ✅ Password reset
+│       │   │   └── (dashboard)/
+│       │   │       ├── layout.tsx     ✅ Dashboard layout w/ sidebar
+│       │   │       ├── dashboard/     ✅ Stats page
+│       │   │       ├── projects/      ✅ TanStack Table
+│       │   │       └── admin/cms/     ✅ CMS admin page
+│       │   │       └── documents/     ✅ Documents list + editor
 │       │   ├── components/
-│       │   │   ├── projects/          ✅ Done
-│       │   │   ├── docs/              ⏳ Next
-│       │   │   └── admin/cms/         ⏳ Next
-│       │   └── hooks/
+│       │   │   ├── projects/          ✅ ProjectsTable
+│       │   │   ├── docs/              ✅ DocumentEditor with toolbar
+│       │   │   ├── admin/cms/         ✅ DynamicFieldsManager, Dialog, Renderer, WorkflowBuilder
+│       │   │   └── admin/form-builder/ ✅ FormBuilder, FieldPalette, FieldProperties, FormCanvas
+│       │   ├── hooks/                 ✅ useProjects, useFeature
+│       │   └── lib/
+│       │       ├── supabase/          ✅ client, server, middleware
+│       │       ├── providers.tsx      ✅ TanStack Query
+│       │       └── tenant-context.tsx ✅ Tenant provider
+│       ├── middleware.ts              ✅ Auth middleware
 │       └── package.json
 ├── packages/
-│   ├── db/                            # Prisma + Supabase
-│   │   └── prisma/schema.prisma       ✅ Done
-│   ├── ui/                            # shadcn/ui
-│   └── types/
+│   ├── ui/                            ✅ @rivest/ui
+│   │   └── src/components/            Button, Card, Input, Label, Badge
+│   ├── db/                            ✅ @rivest/db
+│   │   └── prisma/schema.prisma       Full schema
+│   └── types/                         ✅ @rivest/types
+│       └── src/
+│           ├── index.ts               Core types
+│           └── cms.types.ts           ✅ CMS types
 ├── supabase/
 │   └── migrations/
-│       ├── 001_initial.sql            ✅ Done
-│       ├── 002_rls.sql                ✅ Done
-│       └── 003_cms_system.sql         ⏳ Creating now
-├── PROJECT-MEMORY.md                  # ⭐ This file (quick context)
-├── RIVEST-COMPLETE-GUIDE.md           # 📖 Full reference (11,930 lines)
-└── README.md
+│       ├── 001_initial_schema.sql     ✅ Core tables
+│       ├── 002_rls_policies.sql       ✅ RLS policies
+│       └── 003_cms_system.sql         ✅ CMS tables
+├── .github/workflows/ci.yml           ✅ GitHub Actions
+└── manual/
+    ├── PROJECT-MEMORY.md              ⭐ This file
+    └── RIVEST-COMPLETE-GUIDE.md       📖 Full reference
 ```
 
 ---
 
-## 🗄️ DATABASE (Key Tables)
+## 🗄️ DATABASE SCHEMA
 
+### Core Tables (001_initial_schema.sql) ✅
 ```sql
--- Core (SESSION 2) ✅
-tenants, user_profiles, projects, companies, invoices, 
-employees, time_entries, vehicles, documents, audit_log
-
--- CMS (SESSION 4) ⏳
-dynamic_fields              -- Custom fields per entity
-dynamic_field_values        -- Field values storage
-workflows                   -- State machines
-workflow_history            -- Transition log
-notification_rules          -- Email/SMS/webhook triggers
-notification_log            -- Sent notifications
-
--- Collaborative Docs (SESSION 4) ⏳
-documents_collaborative     -- Main docs table
-document_versions           -- Version history
-document_comments           -- Comments & mentions
-document_collaborators      -- Permissions
-document_presence           -- Real-time online users
-document_exports            -- PDF/Markdown exports
+tenants, user_profiles, projects, companies, invoices,
+employees, documents, audit_log
 ```
 
-**Full schema:** See `RIVEST-COMPLETE-GUIDE.md` → OSAS IX (peatükid 48-54)
+### CMS Tables (003_cms_system.sql) ✅
+```sql
+-- Dynamic Fields
+dynamic_fields              -- Field definitions
+dynamic_field_values        -- Field values per entity
+
+-- Workflows
+workflows                   -- Workflow definitions
+workflow_history           -- Transition audit trail
+
+-- Notifications
+notification_rules         -- Trigger-based rules
+notification_log           -- Sent notifications
+
+-- Collaborative Docs
+documents_collaborative    -- Real-time docs
+document_versions         -- Version history
+document_comments         -- Comments + mentions
+document_collaborators    -- Permissions
+document_presence         -- Who's online
+```
 
 ---
 
-## ⚙️ TECH STACK
+## ⚙️ TECH STACK (Implemented)
 
 ```yaml
-Monorepo:     Turborepo 2 + pnpm 9
-Frontend:     Next.js 14 App Router
-Database:     Supabase (PostgreSQL 15)
-ORM:          Prisma 5
-UI:           shadcn/ui + Tailwind
-State:        TanStack Query 5 + Zustand
-Tables:       TanStack Table 8 + Virtual
-
-# CMS & Docs:
-Editor:       Tiptap (ProseMirror)
-Collaboration: Y.js (CRDT)
-Realtime:     Supabase Realtime
+Monorepo:     Turborepo 2 + pnpm 9        ✅
+Frontend:     Next.js 14 App Router        ✅
+Database:     Supabase (PostgreSQL 15)     ⏳ Need connection
+ORM:          Prisma 5                     ✅ Schema ready
+UI:           shadcn/ui + Tailwind         ✅
+State:        TanStack Query 5 + Zustand   ✅
+Tables:       TanStack Table 8             ✅
+Workflows:    ReactFlow 11                 ✅
+Documents:    Tiptap 3                     ✅
 ```
 
 ---
 
-## 📝 CURRENT TASK
+## 📝 NEXT STEPS
 
-### **SESSION 4: CMS + Collaborative Docs**
+### **SESSION 8: Supabase Connection** ⭐ NEXT
+Need credentials:
+- `NEXT_PUBLIC_SUPABASE_URL`
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+- `DATABASE_URL`
 
-**Goal:** Setup foundation for admin customization + real-time docs
-
-**Files to Create:**
-
-```typescript
-// 1. Database Migration
-supabase/migrations/003_cms_system.sql
-  - dynamic_fields table
-  - workflows table
-  - documents_collaborative table
-  - RLS policies
-  - Functions
-
-// 2. Prisma Schema Update
-packages/db/prisma/schema.prisma
-  - Add CMS models
-  - Add document models
-
-// 3. Basic UI Components
-apps/web/src/components/admin/cms/
-  - DynamicFieldsManager.tsx
-  - DynamicFieldDialog.tsx
-  - DynamicFieldsRenderer.tsx
-
-apps/web/src/components/docs/
-  - DocumentEditor.tsx (Tiptap)
-  - DocumentToolbar.tsx
-  - CollaboratorBar.tsx
-
-// 4. Dependencies
-pnpm add @tiptap/react @tiptap/starter-kit
-pnpm add @tiptap/extension-collaboration
-pnpm add @tiptap/extension-table
-pnpm add yjs y-supabase
-```
-
-**Detailed code:** See `RIVEST-COMPLETE-GUIDE.md` → OSAS IX
+Tasks:
+- Connect to real Supabase database
+- Run migrations
+- Replace mock data with real queries
+- Add authentication
 
 ---
 
-## 🔧 ENVIRONMENT
+## 🔧 ENVIRONMENT NEEDED
 
 ```bash
 # .env.local (apps/web/)
@@ -166,240 +223,249 @@ NEXT_PUBLIC_SUPABASE_URL="https://xyz.supabase.co"
 NEXT_PUBLIC_SUPABASE_ANON_KEY="eyJ..."
 ```
 
-**Supabase Project:** rivest-platform  
-**GitHub Repo:** github.com/silvervatsel/rivest-platform  
-**Branch:** main
+**GitHub Repo:** github.com/silvervat/ehitusOS
+**Branch:** claude/setup-rivest-platform-01DCqvSnPb6nkYDmYBkruVgi
 
 ---
 
-## 📋 CODING STANDARDS
+## 📝 COMMIT HISTORY
 
+```
+039e907 - Add Invoices, Employees, and Settings pages
+2674269 - SESSION 7: Add Document Editor with Tiptap
+8a5ef65 - SESSION 6: Add Workflow Builder with ReactFlow
+4438d5b - SESSION 5: Add Dynamic Fields UI components
+43be683 - SESSION 4: Add CMS system foundation
+af75997 - SESSION 3: Add TanStack Table for projects list
+12beeec - SESSION 2: Add Supabase client + TanStack Query setup
+561e556 - Update PROJECT-MEMORY.md with actual SESSION 1 status
+9414739 - SESSION 1: Complete monorepo setup with Turborepo + pnpm
+```
+
+---
+
+## 🎯 WHAT'S WORKING NOW
+
+1. **Landing Page** → `/` shows Rivest Platform intro
+2. **Dashboard** → `/dashboard` shows stats cards
+3. **Projects** → `/projects` shows TanStack Table with mock data
+4. **Invoices** → `/invoices` shows:
+   - Invoice list with TanStack Table
+   - Stats cards (total, paid, pending, overdue)
+   - Search and sorting
+5. **Employees** → `/employees` shows:
+   - Employee list with avatars
+   - Department badges, contact links
+   - Stats (total, active, on leave)
+6. **Documents** → `/documents` shows:
+   - Document list with filters
+   - Rich Text Editor (Tiptap) with full toolbar
+7. **Settings** → `/settings` shows:
+   - Profile, Company, Notifications, Security, Appearance, Language tabs
+   - Form inputs and toggles
+8. **CMS Admin** → `/admin/cms` shows:
+   - **Dynamic Fields** - Add/Edit/Delete custom fields
+   - **Workflow Builder** - Visual state machine editor
+9. **Database Schema** → 3 migrations ready for Supabase
+10. **GitHub Actions** → CI/CD workflow ready
+
+---
+
+## 📖 REFERENCE
+
+See `RIVEST-COMPLETE-GUIDE.md` for:
+- **OSAS I:** Architecture (chapters 1-5)
+- **OSAS II:** Security (chapters 6-9)
+- **OSAS VIII:** Table Designer (chapters 42-47)
+- **OSAS IX:** CMS System (chapters 48-54) ⭐ Current focus
+
+---
+
+## 📜 PIIBEL KOKKUVÕTE (Key Patterns)
+
+### Workflow Builder (Chapter 52)
 ```typescript
-// Max lines
-File: 300 lines
-Function: 50 lines
+// Use ReactFlow for visual workflow editor
+import ReactFlow, { Node, Edge, Controls, Background } from 'reactflow'
 
-// Naming
-Components: PascalCase
-Files: kebab-case
-API: /api/resource/route.ts
+// Workflow Types (from cms.types.ts)
+interface Workflow {
+  id: string
+  name: string
+  entityType: string  // 'projects' | 'invoices' | etc.
+  states: WorkflowState[]
+  transitions: WorkflowTransition[]
+  initialState: string
+  isActive: boolean
+}
 
-// TypeScript
-Strict: ON
-No 'any'
+interface WorkflowState {
+  id: string
+  name: string        // 'draft', 'review', 'approved'
+  label: string       // 'Draft', 'In Review', 'Approved'
+  color: string       // '#279989'
+  canEdit: string[]   // ['admin', 'manager']
+  canTransition: string[]
+  onEnter?: WorkflowAction[]
+  onExit?: WorkflowAction[]
+}
 
-// Database
-- ALWAYS: tenant_id in WHERE
-- ALWAYS: deleted_at IS NULL
-- Soft delete (never hard DELETE)
+interface WorkflowTransition {
+  id: string
+  from: string        // State ID
+  to: string          // State ID
+  label: string       // 'Submit for Review'
+  allowedRoles: string[]
+  conditions?: TransitionCondition[]
+  actions?: WorkflowAction[]
+  requireComment: boolean
+  buttonVariant?: 'default' | 'destructive' | 'outline'
+}
+
+interface WorkflowAction {
+  type: 'update_field' | 'send_notification' | 'create_task' | 'webhook'
+  // ... action-specific fields
+}
 ```
 
-**Full standards:** See `RIVEST-COMPLETE-GUIDE.md` → OSAS I (peatükk 1-5)
+### Status Manager Pattern
+```typescript
+class StatusManager {
+  // Get available next statuses for entity
+  getAvailableStatuses(entityType, currentStatus, userRole)
 
----
+  // Transition entity to new status
+  transitionStatus(entityType, entityId, fromStatus, toStatus, userId, comment?)
 
-## 🚀 QUICK COMMANDS
-
-```bash
-# Dev
-pnpm dev                    # All apps
-pnpm --filter web dev       # Web only
-
-# Database
-npx supabase db push        # Push migrations
-npx prisma generate         # Generate types
-npx prisma studio           # DB GUI
-
-# Git
-git add .
-git commit -m "SESSION X: Feature Y"
-git push origin main
-
-# CMS Routes
-/admin/cms/dynamic-fields/projects     # Manage project fields
-/admin/cms/workflows/projects          # Setup workflows
-/admin/cms/notifications               # Notification rules
-
-# Docs Routes
-/docs                       # All documents
-/docs/new                   # Create new document
-/docs/[id]/edit            # Edit (real-time collaboration)
-/share/[token]             # Public shared document
+  // Log to workflow_history table
+  logStatusTransition(data)
+}
 ```
 
----
-
-## 📖 FULL DOCUMENTATION
-
-### **RIVEST-COMPLETE-GUIDE.md** (324 KB, 11,930 lines)
-
-```yaml
-Structure:
-  OSAS I:     Põhimõtted ja Arhitektuur (1-5)
-  OSAS II:    Turvalisus (6-9)
-  OSAS III:   Jõudlus (10-14)
-  OSAS IV:    Arhiveerimine (15-19)
-  OSAS V:     Import/Export (20-26)
-  OSAS VI:    Template Editor (27-33)
-  OSAS VII:   Form Builder (34-41)
-  OSAS VIII:  Table Designer (42-47)
-  OSAS IX:    CMS Sisuhaldus (48-54)     ⭐ READ FOR SESSION 4
-  OSAS X:     Dialog Designer (55-59)
-  OSAS XI-XV: Automation, Frontend, Backend, Testing, Ops
-
-Current Focus:
-  OSAS IX contains:
-  - Complete database schema (SQL code ready to copy)
-  - Dynamic fields system (full TypeScript implementation)
-  - Workflow builder (ReactFlow + state machine)
-  - Notification engine (multi-channel)
-  - Collaborative documents (Tiptap + Y.js)
-  - Real-time presence (Supabase Realtime)
+### Default Workflow Example
+```typescript
+const projectWorkflow: Workflow = {
+  name: 'Project Lifecycle',
+  entityType: 'projects',
+  initialState: 'draft',
+  states: [
+    { id: 'draft', name: 'draft', label: 'Mustand', color: '#94a3b8' },
+    { id: 'active', name: 'active', label: 'Aktiivne', color: '#279989' },
+    { id: 'review', name: 'review', label: 'Ülevaatusel', color: '#eab308' },
+    { id: 'completed', name: 'completed', label: 'Lõpetatud', color: '#22c55e' },
+    { id: 'archived', name: 'archived', label: 'Arhiveeritud', color: '#6b7280' }
+  ],
+  transitions: [
+    { from: 'draft', to: 'active', label: 'Aktiveeri', allowedRoles: ['admin', 'manager'] },
+    { from: 'active', to: 'review', label: 'Saada ülevaatusele', allowedRoles: ['admin', 'manager'] },
+    { from: 'review', to: 'completed', label: 'Kinnita', allowedRoles: ['admin'] },
+    { from: 'review', to: 'active', label: 'Tagasi töösse', allowedRoles: ['admin'] },
+    { from: 'completed', to: 'archived', label: 'Arhiveeri', allowedRoles: ['admin'] }
+  ]
+}
 ```
 
-**Usage:** When need specific implementation details, open guide and search for chapter
-
----
-
-## 🐛 KNOWN ISSUES
-
-None currently.
-
----
-
-## 💡 SESSION NOTES
-
-### **CMS Features (OSAS IX):**
-- **Dynamic fields:** Admin can add custom fields to ANY module without code
-- **Workflow builder:** Visual state machine (Draft → Review → Approved)
-- **Notifications:** Multi-channel triggers (email, SMS, in-app, webhook)
-- **15+ field types:** text, number, select, date, file, checkbox, etc.
-
-### **Collaborative Docs (like ClickUp/Notion):**
-- **Real-time editing:** Multiple users editing simultaneously
-- **Rich text:** Tiptap editor (bold, italic, headings, lists)
-- **Tables:** Draggable, resizable tables
-- **Images:** Drag & drop, paste from clipboard
-- **Comments:** Thread comments with @mentions
-- **Version history:** Rollback to any previous version
-- **Public sharing:** Share with password protection
-- **Export:** PDF, Markdown, DOCX
-
-**Implementation details:** All code in `RIVEST-COMPLETE-GUIDE.md` OSAS IX
-
----
-
-## 📝 LAST 5 COMMITS
-
-```
-xyz789 - SESSION 3: Projects list complete (2 hours ago)
-abc456 - SESSION 2: Database schema + RLS (1 day ago)
-def123 - SESSION 1: Monorepo setup (1 day ago)
-ghi789 - Add PROJECT-MEMORY + GUIDE (2 days ago)
-jkl012 - Initial commit (2 days ago)
+### Notification Rules (Chapter 54)
+```typescript
+interface NotificationRule {
+  id: string
+  entityType: string
+  trigger: {
+    type: 'status_change' | 'field_update' | 'deadline' | 'custom'
+    conditions?: object
+    delay?: number  // minutes
+  }
+  channels: ('email' | 'sms' | 'in_app')[]
+  template: string
+  recipients: string[]  // User IDs or roles
+  isActive: boolean
+}
 ```
 
----
+### Document Editor (SESSION 7)
+```typescript
+// Tiptap rich text editor with extensions
+import { useEditor, EditorContent } from '@tiptap/react'
+import StarterKit from '@tiptap/starter-kit'
+import Placeholder from '@tiptap/extension-placeholder'
+import Link from '@tiptap/extension-link'
+import Image from '@tiptap/extension-image'
+import { Table, TableRow, TableCell, TableHeader } from '@tiptap/extension-table'
 
-## 🎯 HOW CLAUDE CODE USES THIS
+// Editor setup
+const editor = useEditor({
+  extensions: [
+    StarterKit,
+    Placeholder.configure({ placeholder: 'Alusta kirjutamist...' }),
+    Link.configure({ openOnClick: false }),
+    Image.configure({ inline: true, allowBase64: true }),
+    Table.configure({ resizable: true }),
+    TableRow, TableHeader, TableCell,
+  ],
+  content: document.content,
+  onUpdate: ({ editor }) => {
+    // Auto-save to database
+    saveDocument(documentId, editor.getJSON())
+  },
+})
 
-**Session Start:**
-
-```bash
-# 1. Claude reads this file (5 seconds)
-cat PROJECT-MEMORY.md
-
-# 2. Understands current state
-echo "Current: SESSION 4 - CMS setup"
-echo "Task: Create 003_cms_system.sql"
-
-# 3. If needs implementation details
-# Opens RIVEST-COMPLETE-GUIDE.md → OSAS IX
-grep -A 200 "## 48. CONTENT MANAGEMENT SYSTEM" RIVEST-COMPLETE-GUIDE.md
-
-# 4. Starts working
-cd ~/projects/rivest-platform
-# Create migration file...
-# Copy schema from guide...
+// Toolbar commands
+editor.chain().focus().toggleBold().run()
+editor.chain().focus().toggleHeading({ level: 1 }).run()
+editor.chain().focus().insertTable({ rows: 3, cols: 3 }).run()
+editor.chain().focus().setImage({ src: url }).run()
 ```
 
-**You Just Say:**
+### Form Builder (SESSION 8)
+```typescript
+// Visual drag-and-drop form builder (JotForm style)
+import { DndContext, DragEndEvent, pointerWithin } from '@dnd-kit/core'
+import { SortableContext, useSortable } from '@dnd-kit/sortable'
 
-```
-"Claude Code - jätka"
-```
+// Field Types (from types.ts)
+type FieldType =
+  | 'text' | 'email' | 'phone' | 'number' | 'url' | 'textarea'
+  | 'select' | 'radio' | 'checkbox' | 'multi_select'
+  | 'date' | 'time' | 'datetime'
+  | 'file_upload' | 'signature' | 'rating' | 'slider'
+  | 'heading' | 'paragraph' | 'divider'
 
----
+interface FormField {
+  id: string
+  type: FieldType
+  label: string
+  placeholder?: string
+  description?: string
+  required: boolean
+  validation?: ValidationRule[]
+  options?: FieldOption[]          // For select/radio/checkbox
+  width?: 'full' | 'half' | 'third'
+  settings?: Record<string, unknown>
+}
 
-## ✅ PRE-COMMIT CHECKLIST
+interface FormTemplate {
+  id: string
+  name: string
+  fields: FormField[]
+  settings: FormSettings
+  theme: FormTheme
+}
 
-```yaml
-Code Quality:
-  - [ ] Max 300 lines per file
-  - [ ] Max 50 lines per function
-  - [ ] TypeScript strict mode
-  - [ ] No 'any' types
-  - [ ] ESLint errors = 0
-  - [ ] No console.log statements
+// Components structure
+// - FormBuilder: Main component with tabs (build/settings/theme)
+// - FieldPalette: Sidebar with draggable field types
+// - FormCanvas: Drop zone with sortable fields
+// - FieldProperties: Right panel for editing selected field
 
-Functionality:
-  - [ ] Feature works as expected
-  - [ ] No console errors
-  - [ ] Mobile responsive
-  - [ ] RLS policies tested
-
-Database:
-  - [ ] tenant_id in all queries
-  - [ ] Soft delete implemented
-  - [ ] RLS policies active
-  - [ ] Indexes added for performance
-
-Git:
-  - [ ] Descriptive commit message
-  - [ ] No .env files committed
-  - [ ] No node_modules
-  - [ ] Clean git diff
+// DnD setup
+<DndContext collisionDetection={pointerWithin} onDragEnd={handleDragEnd}>
+  <FieldPalette />
+  <FormCanvas fields={fields} selectedFieldId={selectedField?.id} />
+  <FieldProperties field={selectedField} onUpdate={handleFieldUpdate} />
+</DndContext>
 ```
 
 ---
 
-## 🔗 QUICK REFERENCE
-
-- **Full Documentation:** `RIVEST-COMPLETE-GUIDE.md` (11,930 lines)
-- **Current Focus:** OSAS IX - CMS Sisuhaldus (peatükid 48-54)
-- **Database Schema:** OSAS IX → Complete SQL code
-- **Tiptap Setup:** OSAS IX → DocumentEditor.tsx code
-- **Y.js Collaboration:** OSAS IX → Real-time setup
-
----
-
-**Last Updated:** 2024-11-27 17:00  
-**Auto-Update:** Every session end  
-**Version:** 5.0 - Optimized for Claude Code  
-**File Size:** ~5 KB (vs 324 KB guide)
-
----
-
-## 🚀 READY TO START?
-
-**Push to GitHub:**
-```bash
-git add PROJECT-MEMORY.md RIVEST-COMPLETE-GUIDE.md
-git commit -m "Add project memory + complete guide"
-git push origin main
-```
-
-**Then tell Claude Code:**
-```
-"Claude Code - jätka PROJECT-MEMORY.md järgi"
-```
-
-**Claude will:**
-1. ✅ Read PROJECT-MEMORY.md (quick context)
-2. ✅ See SESSION 4 task
-3. ✅ Open RIVEST-COMPLETE-GUIDE.md OSAS IX if needed
-4. ✅ Create migration files
-5. ✅ Setup CMS + Collaborative Docs
-6. ✅ Commit & push
-
-🎯 **Perfect workflow!**
+**Last Updated:** 2025-11-28 22:00
+**Version:** 12.0 - Added Auth UI pages (SESSION 8+)
