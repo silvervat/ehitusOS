@@ -101,7 +101,7 @@ export function ModalDesigner({ modal, onSave, onCancel }: ModalDesignerProps) {
     if (!modal?.key) {
       const newKey = newName
         .toLowerCase()
-        .replace(/[aouõ]/g, (c) => ({ a: 'a', o: 'o', u: 'u', o: 'o' }[c] || c))
+        .replace(/[äöüõ]/g, (c) => ({ ä: 'a', ö: 'o', ü: 'u', õ: 'o' }[c] || c))
         .replace(/[^a-z0-9]+/g, '-')
         .replace(/^-|-$/g, '')
       setKey(newKey)
