@@ -127,10 +127,17 @@ export default function FileVaultPage() {
   const fetchVault = useCallback(async () => {
     try {
       const response = await fetch('/api/file-vault/vaults')
-      if (!response.ok) {
-        throw new Error('Failed to fetch vaults')
-      }
       const data = await response.json()
+
+      if (!response.ok) {
+        console.error('Vault API error:', data)
+        const errorMsg = data.details
+          ? `${data.error}: ${data.details}`
+          : data.error || 'Tundmatu viga'
+        setError(errorMsg)
+        return null
+      }
+
       if (data.vaults && data.vaults.length > 0) {
         setVault(data.vaults[0])
         return data.vaults[0].id

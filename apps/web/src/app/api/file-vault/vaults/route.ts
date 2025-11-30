@@ -47,7 +47,11 @@ export async function GET(request: Request) {
 
       if (tenantError) {
         console.error('Error creating tenant:', tenantError)
-        return NextResponse.json({ error: 'Failed to setup account' }, { status: 500 })
+        return NextResponse.json({
+          error: 'Failed to setup account',
+          details: tenantError.message,
+          code: tenantError.code
+        }, { status: 500 })
       }
 
       // Create or update user profile
@@ -65,7 +69,11 @@ export async function GET(request: Request) {
 
       if (profileError) {
         console.error('Error creating profile:', profileError)
-        return NextResponse.json({ error: 'Failed to setup user profile' }, { status: 500 })
+        return NextResponse.json({
+          error: 'Failed to setup user profile',
+          details: profileError.message,
+          code: profileError.code
+        }, { status: 500 })
       }
 
       profile = newProfile
