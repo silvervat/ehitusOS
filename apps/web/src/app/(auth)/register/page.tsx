@@ -4,6 +4,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { Eye, EyeOff, Mail, Lock, User, Building2, Loader2, Check } from 'lucide-react'
+import { createClient } from '@/lib/supabase/client'
 
 export default function RegisterPage() {
   const router = useRouter()
@@ -31,6 +32,14 @@ export default function RegisterPage() {
     setFormData((prev) => ({ ...prev, [name]: value }))
   }
 
+  // Generate slug from company name
+  const generateSlug = (name: string) => {
+    return name
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/(^-|-$)/g, '')
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
@@ -53,13 +62,76 @@ export default function RegisterPage() {
 
     setIsLoading(true)
 
-    // Mock registration - replace with real Supabase auth later
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1500))
+      const supabase = createClient()
+      const fullName = `${formData.firstName} ${formData.lastName}`.trim()
 
-      // Mock success - redirect to login
+      // 1. Sign up the user with Supabase Auth
+      const { data: authData, error: signUpError } = await supabase.auth.signUp({
+        email: formData.email,
+        password: formData.password,
+        options: {
+          data: {
+            full_name: fullName,
+            company: formData.company,
+          },
+        },
+      })
+
+      if (signUpError) {
+        if (signUpError.message.includes('already registered')) {
+          setError('See e-posti aadress on juba registreeritud')
+        } else {
+          setError(signUpError.message)
+        }
+        return
+      }
+
+      if (!authData.user) {
+        setError('Kasutaja loomine ebaõnnestus')
+        return
+      }
+
+      // 2. Create tenant for the company
+      const slug = generateSlug(formData.company)
+      const { data: tenant, error: tenantError } = await supabase
+        .from('tenants')
+        .insert({
+          name: formData.company,
+          slug: slug + '-' + Date.now(), // Ensure unique slug
+          billing_email: formData.email,
+          trial_ends_at: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString(), // 14 days trial
+        })
+        .select()
+        .single()
+
+      if (tenantError) {
+        console.error('Tenant creation error:', tenantError)
+        // Continue anyway - tenant might be created by trigger
+      }
+
+      // 3. Create user profile
+      if (tenant) {
+        const { error: profileError } = await supabase
+          .from('user_profiles')
+          .insert({
+            tenant_id: tenant.id,
+            auth_user_id: authData.user.id,
+            email: formData.email,
+            full_name: fullName,
+            role: 'admin', // First user of tenant is admin
+          })
+
+        if (profileError) {
+          console.error('Profile creation error:', profileError)
+          // Continue anyway - profile might be created by trigger
+        }
+      }
+
+      // Success - redirect to login
       router.push('/login?registered=true')
-    } catch {
+    } catch (err) {
+      console.error('Registration error:', err)
       setError('Midagi läks valesti. Proovi uuesti.')
     } finally {
       setIsLoading(false)

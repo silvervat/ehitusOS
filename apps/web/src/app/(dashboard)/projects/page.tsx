@@ -1,10 +1,13 @@
 'use client'
 
+import { useState } from 'react'
 import { useProjects } from '@/hooks/use-projects'
 import { ProjectsTable } from '@/components/projects/projects-table'
+import { AddProjectModal } from '@/components/projects/add-project-modal'
 import { Plus } from 'lucide-react'
 
 export default function ProjectsPage() {
+  const [isModalOpen, setIsModalOpen] = useState(false)
   const { data: projects, isLoading, error } = useProjects()
 
   if (error) {
@@ -22,10 +25,11 @@ export default function ProjectsPage() {
         <div>
           <h1 className="text-2xl font-bold text-slate-900">Projektid</h1>
           <p className="text-slate-600 text-sm mt-1">
-            Halda ehitusprojekte ja jälgi nende staatust
+            Halda ehitusprojekte ja jalgi nende staatust
           </p>
         </div>
         <button
+          onClick={() => setIsModalOpen(true)}
           className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-white font-medium transition-colors hover:opacity-90"
           style={{ backgroundColor: '#279989' }}
         >
@@ -35,6 +39,8 @@ export default function ProjectsPage() {
       </div>
 
       <ProjectsTable data={projects || []} isLoading={isLoading} />
+
+      <AddProjectModal open={isModalOpen} onOpenChange={setIsModalOpen} />
     </div>
   )
 }

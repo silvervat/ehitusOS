@@ -4,19 +4,21 @@ import { useState } from 'react'
 import { DynamicFieldsManager } from '@/components/admin/cms/dynamic-fields-manager'
 import { WorkflowBuilder } from '@/components/admin/cms/workflow-builder'
 import { FormBuilder } from '@/components/admin/form-builder'
-import { Settings, Database, Bell, FileText, Workflow, FormInput } from 'lucide-react'
+import { ModalList } from '@/components/admin/modal-designer'
+import { Settings, Database, Bell, FileText, Workflow, FormInput, LayoutTemplate } from 'lucide-react'
 
 const entities = [
   { id: 'projects', label: 'Projektid', icon: FileText },
   { id: 'invoices', label: 'Arved', icon: FileText },
-  { id: 'employees', label: 'Töötajad', icon: FileText },
-  { id: 'companies', label: 'Ettevõtted', icon: FileText },
+  { id: 'employees', label: 'Tootajad', icon: FileText },
+  { id: 'companies', label: 'Ettevotted', icon: FileText },
 ]
 
 const tabs = [
-  { id: 'fields', label: 'Dünaamilised väljad', icon: Database },
-  { id: 'workflows', label: 'Töövood', icon: Workflow },
+  { id: 'fields', label: 'Dunaamilised valjad', icon: Database },
+  { id: 'workflows', label: 'Toovood', icon: Workflow },
   { id: 'forms', label: 'Vormid', icon: FormInput },
+  { id: 'modals', label: 'Modalid', icon: LayoutTemplate },
   { id: 'notifications', label: 'Teavitused', icon: Bell },
   { id: 'settings', label: 'Seaded', icon: Settings },
 ]
@@ -92,6 +94,10 @@ export default function CMSAdminPage() {
 
         {selectedTab === 'forms' && (
           <FormBuilder />
+        )}
+
+        {selectedTab === 'modals' && (
+          <ModalList />
         )}
 
         {selectedTab === 'notifications' && (
