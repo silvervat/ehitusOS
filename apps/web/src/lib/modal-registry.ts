@@ -282,5 +282,49 @@ registerModal({
   features: ['field-types', 'options-editor', 'permissions', 'validation'],
 })
 
+// PreviewDialog - UltraTable Dialog Designer
+registerModal({
+  key: 'preview-dialog',
+  name: 'Vormi eelvaate dialoog',
+  description: 'UltraTable dialoogi kujundaja eelvaate modal',
+  type: 'form',
+  category: 'forms',
+  componentPath: 'src/components/admin/ultra-table/dialog-designer/PreviewDialog.tsx',
+  icon: 'info',
+  iconColor: '#279989',
+  iconBgColor: '#27998920',
+  title: 'Vormi eelvaade',
+  message: 'Vaata vormi valimust enne salvestamist',
+  buttons: [
+    { label: 'Sulge', variant: 'outline', action: 'cancel' },
+    { label: 'Salvesta', variant: 'primary', action: 'confirm' },
+  ],
+  hasInputs: true,
+  isForm: true,
+  features: ['preview-mode', 'dynamic-fields', 'section-layout', 'validation'],
+})
+
+// ImportPreview - Import Dialog
+registerModal({
+  key: 'import-preview-dialog',
+  name: 'Impordi dialoog',
+  description: 'Andmete importimise dialoog XLSX/CSV failidest koos eelvaatega',
+  type: 'form',
+  category: 'forms',
+  componentPath: 'src/components/import-export/import-preview.tsx',
+  icon: 'plus',
+  iconColor: '#279989',
+  iconBgColor: '#27998920',
+  title: 'Impordi andmed',
+  message: 'Laadi ules XLSX voi CSV fail andmete importimiseks',
+  buttons: [
+    { label: 'Tuhista', variant: 'outline', action: 'cancel' },
+    { label: 'Impordi', variant: 'primary', action: 'confirm' },
+  ],
+  hasInputs: true,
+  isForm: true,
+  features: ['drag-drop', 'file-upload', 'xlsx-import', 'csv-import', 'validation', 'preview-table', 'pagination'],
+})
+
 // Export for use in CMS
 export type { ModalRegistryEntry }
