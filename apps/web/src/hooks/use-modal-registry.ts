@@ -7,9 +7,12 @@ import {
   registerModal,
   unregisterModal,
   registryEntryToTemplate,
-  type ModalRegistryEntry,
 } from '@/lib/modal-registry'
+import type { ModalRegistryEntry } from '@/lib/modal-registry'
 import type { ModalTemplate } from '@/components/admin/modal-designer/types'
+
+// Re-export the type for consumers
+export type { ModalRegistryEntry }
 
 /**
  * Hook for accessing and managing the modal registry
