@@ -2,11 +2,14 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { Eye, EyeOff, Mail, Lock, Loader2 } from 'lucide-react'
+import { createClient } from '@/lib/supabase/client'
 
 export default function LoginPage() {
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const registered = searchParams.get('registered')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
@@ -19,18 +22,39 @@ export default function LoginPage() {
     setError('')
     setIsLoading(true)
 
-    // Mock authentication - replace with real Supabase auth later
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000))
+      const supabase = createClient()
 
-      // Mock validation
-      if (email === 'demo@rivest.ee' && password === 'demo123') {
-        // Redirect to dashboard on success
-        router.push('/dashboard')
-      } else {
-        setError('Vale e-posti aadress või parool')
+      const { data, error: authError } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      })
+
+      if (authError) {
+        if (authError.message.includes('Invalid login credentials')) {
+          setError('Vale e-posti aadress või parool')
+        } else if (authError.message.includes('Email not confirmed')) {
+          setError('E-posti aadress pole kinnitatud. Kontrolli oma postkasti.')
+        } else {
+          setError(authError.message)
+        }
+        return
       }
+
+      // Check user role and redirect accordingly
+      const { data: profile } = await supabase
+        .from('user_profiles')
+        .select('role')
+        .eq('auth_user_id', data.user?.id)
+        .single()
+
+      // Redirect based on role
+      if (profile?.role === 'admin' || profile?.role === 'superadmin') {
+        router.push('/admin/cms')
+      } else {
+        router.push('/dashboard')
+      }
+      router.refresh()
     } catch {
       setError('Midagi läks valesti. Proovi uuesti.')
     } finally {
@@ -47,16 +71,14 @@ export default function LoginPage() {
           <p className="text-slate-500 mt-2">Logi sisse oma kontole</p>
         </div>
 
-        {/* Demo credentials notice */}
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-          <p className="text-sm text-blue-800">
-            <strong>Demo konto:</strong>
-            <br />
-            E-post: demo@rivest.ee
-            <br />
-            Parool: demo123
-          </p>
-        </div>
+        {/* Success message after registration */}
+        {registered && (
+          <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-6">
+            <p className="text-sm text-green-800">
+              Konto edukalt loodud! Nüüd saad sisse logida.
+            </p>
+          </div>
+        )}
 
         {/* Error message */}
         {error && (
