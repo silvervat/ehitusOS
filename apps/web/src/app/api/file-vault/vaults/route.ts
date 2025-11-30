@@ -26,14 +26,54 @@ export async function GET(request: Request) {
     }
 
     // Get user's profile and tenant
-    const { data: profile } = await supabase
+    let { data: profile } = await supabase
       .from('user_profiles')
       .select('id, tenant_id')
       .eq('auth_user_id', user.id)
       .single()
 
+    // Auto-create profile and tenant if not exists (first-time setup)
     if (!profile?.tenant_id) {
-      return NextResponse.json({ error: 'User profile not found' }, { status: 400 })
+      // Create tenant first
+      const { data: newTenant, error: tenantError } = await supabaseAdmin
+        .from('tenants')
+        .insert({
+          name: user.email?.split('@')[0] || 'My Company',
+          slug: user.id.substring(0, 8),
+          status: 'active',
+        })
+        .select()
+        .single()
+
+      if (tenantError) {
+        console.error('Error creating tenant:', tenantError)
+        return NextResponse.json({ error: 'Failed to setup account' }, { status: 500 })
+      }
+
+      // Create or update user profile
+      const { data: newProfile, error: profileError } = await supabaseAdmin
+        .from('user_profiles')
+        .upsert({
+          auth_user_id: user.id,
+          tenant_id: newTenant.id,
+          email: user.email,
+          full_name: user.user_metadata?.full_name || user.email?.split('@')[0],
+          role: 'admin',
+        }, { onConflict: 'auth_user_id' })
+        .select()
+        .single()
+
+      if (profileError) {
+        console.error('Error creating profile:', profileError)
+        return NextResponse.json({ error: 'Failed to setup user profile' }, { status: 500 })
+      }
+
+      profile = newProfile
+    }
+
+    // Ensure profile exists at this point
+    if (!profile?.tenant_id) {
+      return NextResponse.json({ error: 'Failed to resolve user profile' }, { status: 500 })
     }
 
     // Get vaults for tenant
